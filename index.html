@@ -44,7 +44,7 @@
             </div>
 
             <div class="history-container">
-                <label class="label">🕒 ประวัติในรอบนี้</label>
+                <label class="label">🕒 ประวัติในรอบนี้ (แก้ไขไม่ได้)</label>
                 <div class="table-wrapper">
                     <table class="history-table">
                         <thead>
@@ -52,8 +52,8 @@
                                 <th>เวลา</th>
                                 <th>ชื่อ</th>
                                 <th>ยอด (฿)</th>
-                                <th>ขีด (|)</th> <th></th>
-                            </tr>
+                                <th>ขีด (|)</th>
+                                </tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
@@ -64,15 +64,10 @@
         <div id="tab-summary" class="tab-content">
             <div class="summary-header">
                 <label class="label">📊 ยอดคงเหลือรายบุคคล</label>
-                <div class="summary-actions">
-                    <button class="btn-small" onclick="copySummary()"><i class="fa-regular fa-copy"></i> ก๊อปปี้</button>
-                </div>
+                <button class="btn-small" onclick="copySummary()"><i class="fa-regular fa-copy"></i> ก๊อปปี้</button>
             </div>
             <div id="summaryList" class="summary-grid"></div>
-            
-            <button class="btn-end-round" onclick="endRound()">
-                <i class="fa-solid fa-flag-checkered"></i> จบยอดและเริ่มรอบใหม่
-            </button>
+            <button class="btn-end-round" onclick="endRound()">จบยอดและเริ่มรอบใหม่</button>
         </div>
 
         <div id="tab-log" class="tab-content">
