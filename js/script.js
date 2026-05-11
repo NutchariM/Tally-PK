@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// 🚩 Firebase Configuration (Tally-PK)
 const firebaseConfig = {
   apiKey: "AIzaSyCr9fXfx9m9cQ9_N_VhE3VTLbgdk3ZXRKM",
   authDomain: "tally-pk.firebaseapp.com",
@@ -12,7 +11,6 @@ const firebaseConfig = {
   appId: "1:849778226457:web:6ec1724e76588358f3c188"
 };
 
-// เริ่มต้นระบบ Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -20,29 +18,22 @@ let currentMode = 'withdraw';
 let transactions = [];
 let sessions = [];
 
-// --- 1. ระบบ Real-time Listener (หัวใจสำคัญ: ทุกคนเห็นตรงกัน) ---
-
-// คอยฟัง "รายการเบิก-คืน" ในรอบปัจจุบัน
+// --- Listener ข้อมูลจาก Cloud ---
 onValue(ref(db, 'transactions'), (snapshot) => {
     const data = snapshot.val();
-    // ถ้าไม่มีข้อมูลให้เป็นอาเรย์ว่าง
     transactions = data ? Object.values(data) : [];
-    
-    // 🚩 สั่งอัปเดตหน้าจอทั้ง Tab 1 และ Tab 2 ทันทีที่ข้อมูลเปลี่ยน
-    updateUI();       // วาดตารางหน้าแรก (Tab 1)
-    renderSummary();  // วาดหน้าสรุปรายคน (Tab 2)
+    updateUI();
+    renderSummary();
 });
 
-// คอยฟัง "ประวัติรอบเก่า" ที่จบไปแล้ว
 onValue(ref(db, 'sessions'), (snapshot) => {
     const data = snapshot.val();
     sessions = data ? Object.values(data).reverse() : [];
-    renderLog(); // วาดหน้าประวัติ (Tab 3)
+    window.renderLog(); // 🚩 เรียกผ่าน window เพื่อความชัวร์
 });
 
-// --- 2. ฟังก์ชันการทำงาน (ผูกกับปุ่มใน HTML) ---
+// --- ฟังก์ชันหลัก (ส่งออกไปที่ window ทั้งหมดเพื่อแก้ปัญหา ReferenceError) ---
 
-// สลับโหมด เบิก / คืน
 window.setMode = (mode) => {
     currentMode = mode;
     const isW = mode === 'withdraw';
@@ -52,16 +43,10 @@ window.setMode = (mode) => {
     document.getElementById('return-section').style.display = isW ? 'none' : 'block';
 };
 
-// บันทึกรายการ (ใช้ทั้งเบิกและคืน)
 window.saveEntry = (amount) => {
     const nameInput = document.getElementById('userName');
     const name = nameInput.value.trim();
-    
-    if (!name) {
-        alert("กรุณาใส่ชื่อก่อนบันทึกครับ");
-        nameInput.focus();
-        return;
-    }
+    if (!name) return alert("กรุณาใส่ชื่อก่อนบันทึกครับ"), nameInput.focus();
 
     const newTx = {
         id: Date.now(),
@@ -71,122 +56,89 @@ window.saveEntry = (amount) => {
         amount: amount
     };
 
-    // ส่งข้อมูลไป Firebase Cloud
     push(ref(db, 'transactions'), newTx);
-
-    // ✅ UX: เคลียร์ช่องชื่อ และเอา Cursor ไปรอที่เดิม
     nameInput.value = '';
     nameInput.focus();
 };
 
-// จัดการการกดปุ่มบันทึกคืนเงิน
 window.handleReturn = () => {
-    const returnInput = document.getElementById('returnAmount');
-    const amt = parseInt(returnInput.value);
-    
-    if (!amt) {
-        alert("ระบุยอดเงินที่จะคืนด้วยครับ");
-        returnInput.focus();
-        return;
-    }
-
-    // เรียกใช้ saveEntry เพื่อบันทึก
+    const input = document.getElementById('returnAmount');
+    const amt = parseInt(input.value);
+    if (!amt) return alert("ระบุยอดเงินด้วยครับ");
     window.saveEntry(amt);
-    
-    // ✅ UX: เคลียร์ช่องระบุยอดเงินคืน
-    returnInput.value = '';
+    input.value = '';
 };
 
-// วาดตารางรายการเบิก-คืน (Tab 1)
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
-    
-    body.innerHTML = transactions.slice().reverse().map(t => {
-        const isW = t.type === 'withdraw';
-        return `
-            <tr>
-                <td>${t.time}</td>
-                <td><strong>${t.name}</strong></td>
-                <td class="${isW ? 't-red' : 't-green'}">${isW ? '+' : '-'}${t.amount.toLocaleString()}</td>
-                <td class="khit-col">${t.amount / 200} ขีด</td>
-            </tr>
-        `;
-    }).join('');
-
+    body.innerHTML = transactions.slice().reverse().map(t => `
+        <tr>
+            <td>${t.time}</td>
+            <td><strong>${t.name}</strong></td>
+            <td class="${t.type === 'withdraw' ? 't-red' : 't-green'}">${t.type === 'withdraw' ? '+' : '-'}${t.amount.toLocaleString()}</td>
+            <td class="khit-col">${t.amount / 200} ขีด</td>
+        </tr>
+    `).join('');
     const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
     document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
-// วาดหน้าสรุปยอดรายคน (Tab 2)
 function renderSummary() {
     const container = document.getElementById('summaryList');
     if (!container) return;
-    
     const summary = {};
     transactions.forEach(t => {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
-    
     const keys = Object.keys(summary);
-    if (keys.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ไม่มีรายการในรอบนี้</p>';
-        return;
-    }
-    
-    container.innerHTML = keys.map(name => `
-        <div class="person-card">
-            <span>${name}</span>
-            <strong>${summary[name].toLocaleString()} ฿</strong>
-        </div>
-    `).join('');
+    container.innerHTML = keys.length ? keys.map(n => `<div class="person-card"><span>${n}</span><strong>${summary[n].toLocaleString()} ฿</strong></div>`).join('') : '<p class="empty-msg">ยังไม่มีข้อมูลในรอบนี้</p>';
 }
 
-// จบยอดรอบปัจจุบัน
 window.endRound = () => {
-    if (transactions.length === 0) return alert("ยังไม่มีรายการให้จบยอด");
-    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่? (ทุกคนจะเห็นประวัติรอบนี้พร้อมกัน)")) return;
-
+    if (!transactions.length) return alert("ยังไม่มีรายการ");
+    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่?")) return;
     const summary = {};
     transactions.forEach(t => {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
-
     const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
-    const session = {
-        id: Date.now(),
-        date: new Date().toLocaleString('th-TH'),
-        total: total,
-        details: summary
-    };
-
-    // เก็บเข้าประวัติและล้างรายการปัจจุบันใน Cloud (ทุกคนจะเห็นเป็น 0 พร้อมกัน)
-    push(ref(db, 'sessions'), session);
+    push(ref(db, 'sessions'), { id: Date.now(), date: new Date().toLocaleString('th-TH'), total, details: summary });
     remove(ref(db, 'transactions'));
-    
-    location.hash = 'log'; // ย้ายไปหน้าประวัติ
+    location.hash = 'log';
 };
 
-// วาดหน้าประวัติ (Tab 3)
-function renderLog() {
+// 🚩 ฟังก์ชันเจ้าปัญหาที่ต้องส่งออกไปที่ window และเพิ่ม Logic "ไม่พบรายการ"
+window.renderLog = () => {
     const container = document.getElementById('logList');
-    if (!container) return;
-    
     const filterValue = document.getElementById('logDateFilter').value;
+    if (!container) return;
+
     if (sessions.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:40px;">ไม่มีประวัติรอบที่จบไปแล้ว</p>';
+        container.innerHTML = '<p class="empty-msg">ไม่มีประวัติการจบยอด</p>';
         return;
     }
 
     let filtered = sessions;
     if (filterValue) {
         filtered = sessions.filter(s => {
-            try {
-                return new Date(s.id).toISOString().split('T')[0] === filterValue;
-            } catch(e) { return false; }
+            // แปลง id (timestamp) เป็นวันที่ YYYY-MM-DD เพื่อเทียบกับ input date
+            const sessionDate = new Date(s.id).toISOString().split('T')[0];
+            return sessionDate === filterValue;
         });
+    }
+
+    // ✅ เพิ่มตรงนี้: ถ้าเลือกวันที่แล้วไม่มีข้อมูล ให้แสดงข้อความแจ้งเตือน
+    if (filterValue && filtered.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px; color: #94a3af;">
+                <i class="fa-regular fa-calendar-xmark" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                <p>ไม่พบรายการของวันที่คุณเลือกครับ</p>
+            </div>
+        `;
+        return;
     }
 
     container.innerHTML = filtered.map(s => `
@@ -194,40 +146,34 @@ function renderLog() {
             <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
             <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿</div>
             <div class="log-details">
-                ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name].toLocaleString()}</span>`).join('')}
+                ${Object.keys(s.details).map(n => `<span>${n}: ${s.details[n].toLocaleString()}</span>`).join('')}
             </div>
         </div>
     `).join('');
-}
+};
 
 window.clearFilter = () => {
     document.getElementById('logDateFilter').value = '';
-    renderLog();
+    window.renderLog();
 };
 
-// ปุ่มล้างโลก (Nuclear Reset)
 window.nuclearReset = () => {
-    if (confirm("⚠️ ล้างข้อมูลทั้งหมดถาวร? (เพื่อนทุกคนข้อมูลหายหมดนะครับ)")) {
+    if (confirm("⚠️ ล้างข้อมูลทั้งหมดถาวร?")) {
         remove(ref(db, '/'));
         location.reload();
     }
 };
 
-// --- 3. ระบบจัดการ Tab (Routing) ---
 function handleRouting() {
     const hash = window.location.hash.replace('#', '') || 'record';
-    
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-
     const targetTab = document.getElementById(`tab-${hash}`);
     const targetBtn = document.getElementById(`btn-${hash}`);
-    
     if (targetTab && targetBtn) {
         targetTab.classList.add('active');
         targetBtn.classList.add('active');
     }
-
     const footer = document.querySelector('.footer-summary');
     if (footer) footer.style.display = (hash === 'record') ? 'block' : 'none';
 }
