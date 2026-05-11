@@ -19,7 +19,13 @@ let currentMode = 'withdraw';
 let transactions = [];
 let sessions = [];
 
-// 📱 ฟังก์ชันจับรุ่นมือถือ (Device Detection)
+// 🆔 สร้าง ID ลับประจำเครื่อง (DeviceId) เพื่อใช้รวมยอดมดกับ Mod เข้าด้วยกัน
+if (!localStorage.getItem('myDeviceID')) {
+    localStorage.setItem('myDeviceID', 'dev-' + Date.now() + Math.random().toString(36).substr(2, 5));
+}
+const myDeviceID = localStorage.getItem('myDeviceID');
+
+// 📱 ฟังก์ชันจับรุ่นมือถือ
 const getDeviceInfo = () => {
     const ua = navigator.userAgent;
     if (/iPhone/i.test(ua)) return "iPhone";
@@ -28,8 +34,6 @@ const getDeviceInfo = () => {
         const match = ua.match(/Android\s+([^\s;]+);?\s+([^;)]+)/);
         return match ? match[2] : "Android";
     }
-    if (/Macintosh/i.test(ua)) return "Mac";
-    if (/Windows/i.test(ua)) return "Windows PC";
     return "Device";
 };
 
@@ -49,7 +53,6 @@ onValue(ref(db, 'sessions'), (snapshot) => {
 
 // --- Functions ---
 
-// ✅ ปลดล็อกชื่อให้แก้ไขได้
 window.enableNameEdit = () => {
     const nameInput = document.getElementById('userName');
     nameInput.disabled = false;
@@ -69,21 +72,17 @@ window.setMode = (mode) => {
 window.saveEntry = (amount) => {
     const nameInput = document.getElementById('userName');
     const newName = nameInput.value.trim();
-    if (!newName) return alert("กรุณาใส่ชื่อก่อนบันทึกครับ"), nameInput.focus();
+    if (!newName) return alert("กรุณาใส่ชื่อก่อนครับ"), nameInput.focus();
 
-    // 🚩 ตรวจสอบการเปลี่ยนชื่อเพื่อเก็บ Log
     const oldName = localStorage.getItem('myTallyName');
-    let renameNote = null;
-    if (oldName && oldName !== newName) {
-        renameNote = `Changed from ${oldName}`;
-    }
+    let renameNote = (oldName && oldName !== newName) ? `Changed from ${oldName}` : null;
 
-    // ✅ บันทึกลงความจำเครื่องและล็อกช่องชื่อ (Dim)
     localStorage.setItem('myTallyName', newName);
     nameInput.disabled = true;
 
     const newTx = {
         id: Date.now(),
+        deviceId: myDeviceID, // 🚩 ใช้ ID นี้เป็นตัวเชื่อมข้อมูล
         time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
         name: newName,
         type: currentMode,
@@ -103,7 +102,7 @@ window.handleReturn = () => {
     input.value = '';
 };
 
-// 1️⃣ หน้าบันทึก: แสดง "ชื่อ - รุ่นมือถือ" และประวัติเปลี่ยนชื่อ
+// 1️⃣ หน้าบันทึก: แสดง "ชื่อ - รุ่นมือถือ"
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
@@ -111,7 +110,6 @@ function updateUI() {
     body.innerHTML = transactions.slice().reverse().map(t => {
         const isW = t.type === 'withdraw';
         const deviceSuffix = t.device ? ` - ${t.device}` : '';
-        
         return `
             <tr>
                 <td style="font-size:0.75rem; color:#94a3af;">${t.time}</td>
@@ -133,37 +131,46 @@ function updateUI() {
     grandTotalEl.style.color = total >= 0 ? '#10b981' : '#ef4444';
 }
 
-// 2️⃣ หน้าสรุป (Tab 2)
+// 2️⃣ หน้าสรุป: รวมยอดตาม DeviceID (แก้ปัญหา มด/Mod แยกกัน)
 function renderSummary() {
     const container = document.getElementById('summaryList');
     if (!container) return;
     
     const summary = {};
     transactions.forEach(t => {
-        if (!summary[t.name]) summary[t.name] = { withdraw: 0, return: 0 };
-        if (t.type === 'withdraw') summary[t.name].withdraw += t.amount;
-        else summary[t.name].return += t.amount;
+        const key = t.deviceId || t.name; // รองรับข้อมูลเก่าที่ไม่มี deviceId
+        
+        if (!summary[key]) {
+            summary[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
+        }
+        
+        // ถ้าชื่อเปลี่ยน ให้ใช้ชื่อล่าสุดที่บันทึก
+        if (t.id >= summary[key].lastTime) {
+            summary[key].name = t.name;
+            summary[key].lastTime = t.id;
+        }
+
+        if (t.type === 'withdraw') summary[key].withdraw += t.amount;
+        else summary[key].return += t.amount;
     });
     
-    container.innerHTML = Object.keys(summary).map(name => {
-        const data = summary[name];
+    container.innerHTML = Object.keys(summary).map(key => {
+        const data = summary[key];
         const net = data.return - data.withdraw; 
         const numColor = net >= 0 ? '#10b981' : '#ef4444';
 
         return `
-            <div class="person-card" style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
+            <div class="person-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                    <strong style="font-size: 1.1em; color: var(--text-main);">👤 ${name}</strong>
+                    <strong style="font-size: 1.1em;">👤 ${data.name}</strong>
                     <div style="text-align: right;">
-                        <div style="font-size: 0.8em; color: #94a3af; margin-bottom: 2px;">ยอดสุทธิ</div>
-                        <strong style="font-size: 1.2em; color: ${numColor};">
-                            ${net >= 0 ? '+' : ''}${net.toLocaleString()} ฿
-                        </strong>
+                        <div style="font-size: 0.8em; color: #94a3af;">ยอดสุทธิ</div>
+                        <strong style="font-size: 1.2em; color: ${numColor};">${net >= 0 ? '+' : ''}${net.toLocaleString()} ฿</strong>
                     </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
-                    <div style="color: #64748b;">เบิก: <strong style="color: #ef4444;">-${data.withdraw.toLocaleString()}</strong></div>
-                    <div style="color: #64748b;">คืน: <strong style="color: #10b981;">+${data.return.toLocaleString()}</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-top:10px;">
+                    <div>เบิก: <strong style="color: #ef4444;">-${data.withdraw.toLocaleString()}</strong></div>
+                    <div>คืน: <strong style="color: #10b981;">+${data.return.toLocaleString()}</strong></div>
                 </div>
             </div>
         `;
@@ -172,19 +179,35 @@ function renderSummary() {
 
 window.endRound = () => {
     if (!transactions.length || !confirm("จบยอดรอบนี้และเริ่มรอบใหม่?")) return;
-    const summary = {};
+    
+    // ก่อนจบยอด ต้องประมวลผลสรุปตาม DeviceID เพื่อเก็บลง Session
+    const finalSummary = {};
     transactions.forEach(t => {
-        if (!summary[t.name]) summary[t.name] = { withdraw: 0, return: 0 };
-        if (t.type === 'withdraw') summary[t.name].withdraw += t.amount;
-        else summary[t.name].return += t.amount;
+        const key = t.deviceId || t.name;
+        if (!finalSummary[key]) {
+            finalSummary[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
+        }
+        if (t.id >= finalSummary[key].lastTime) {
+            finalSummary[key].name = t.name;
+            finalSummary[key].lastTime = t.id;
+        }
+        if (t.type === 'withdraw') finalSummary[key].withdraw += t.amount;
+        else finalSummary[key].return += t.amount;
     });
+
     const total = transactions.reduce((sum, t) => sum + (t.type === 'withdraw' ? -t.amount : t.amount), 0);
-    push(ref(db, 'sessions'), { id: Date.now(), date: new Date().toLocaleString('th-TH'), total, details: summary });
+    
+    push(ref(db, 'sessions'), { 
+        id: Date.now(), 
+        date: new Date().toLocaleString('th-TH'), 
+        total, 
+        details: finalSummary // เก็บข้อมูลที่รวม DeviceID แล้ว
+    });
     remove(ref(db, 'transactions'));
     location.hash = 'log';
 };
 
-// 3️⃣ หน้าประวัติ (Tab 3)
+// 3️⃣ หน้าประวัติรอบ: แสดงยอดที่รวมกลุ่มตาม Device เรียบร้อยแล้ว
 window.renderLog = () => {
     const container = document.getElementById('logList');
     const filterValue = document.getElementById('logDateFilter').value;
@@ -193,21 +216,23 @@ window.renderLog = () => {
     let filtered = sessions;
     if (filterValue) filtered = sessions.filter(s => new Date(s.id).toISOString().split('T')[0] === filterValue);
 
-    container.innerHTML = filtered.map(s => `
-        <div class="log-card">
-            <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
-            <div style="font-weight:bold; margin:5px 0; color: ${s.total >= 0 ? '#10b981' : '#ef4444'}">
-                ยอดสุทธิ: ${s.total >= 0 ? '+' : ''}${s.total.toLocaleString()} ฿
+    container.innerHTML = filtered.map(s => {
+        return `
+            <div class="log-card">
+                <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
+                <div style="font-weight:bold; margin:5px 0; color: ${s.total >= 0 ? '#10b981' : '#ef4444'}">
+                    ยอดสุทธิรอบนี้: ${s.total >= 0 ? '+' : ''}${s.total.toLocaleString()} ฿
+                </div>
+                <div class="log-details">
+                    ${Object.values(s.details).map(d => {
+                        const name = d.name || "Unknown";
+                        const net = (d.return || 0) - (d.withdraw || 0);
+                        return `<span>${name}: <strong style="color: ${net >= 0 ? '#10b981' : '#ef4444'}">${net >= 0 ? '+' : ''}${net.toLocaleString()}</strong></span>`;
+                    }).join('')}
+                </div>
             </div>
-            <div class="log-details">
-                ${Object.keys(s.details).map(name => {
-                    const d = s.details[name];
-                    const net = d.return - d.withdraw;
-                    return `<span>${name}: <strong style="color: ${net >= 0 ? '#10b981' : '#ef4444'}">${net >= 0 ? '+' : ''}${net.toLocaleString()}</strong></span>`;
-                }).join('')}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 };
 
 window.clearFilter = () => { document.getElementById('logDateFilter').value = ''; window.renderLog(); };
