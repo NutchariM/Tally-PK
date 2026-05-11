@@ -61,10 +61,9 @@
             </div>
         </div>
 
-        <div id="tab-summary" class="tab-content">
+       <div id="tab-summary" class="tab-content">
             <div class="summary-header">
                 <label class="label">📊 ยอดคงเหลือรายบุคคล</label>
-                <button class="btn-small" onclick="copySummary()"><i class="fa-regular fa-copy"></i> ก๊อปปี้</button>
             </div>
             <div id="summaryList" class="summary-grid"></div>
             <button class="btn-end-round" onclick="endRound()">จบยอดและเริ่มรอบใหม่</button>
@@ -72,8 +71,12 @@
 
         <div id="tab-log" class="tab-content">
             <label class="label">📜 ประวัติการจบยอด</label>
-            <div id="logList" class="log-grid"></div>
-        </div>
+            <div class="filter-area">
+                <input type="date" id="logDateFilter" class="filter-input" onchange="renderLog()">
+                <button class="btn-clear-filter" onclick="clearFilter()">ล้าง</button>
+            </div>
+        <div id="logList" class="log-grid"></div>
+</div>
     </main>
 
     <footer class="footer-summary">
