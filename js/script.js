@@ -2,33 +2,49 @@ let currentMode = 'withdraw';
 let transactions = [];
 let sessions = [];
 
-// โหลดข้อมูลจากเครื่อง
+// 1. ฟังก์ชันโหลดข้อมูลแบบ Safe-Mode (ป้องกัน Invalid Date)
 function loadData() {
-    transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
-    sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
-}
-
-loadData();
-updateUI();
-
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(tabName));
-    });
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-
-    const footer = document.querySelector('.footer-summary');
-    if (footer) footer.style.display = (tabName === 'record') ? 'block' : 'none';
-
-    // ล้างแคชการแสดงผลและดึงข้อมูลใหม่
-    loadData();
-    if (tabName === 'summary') renderSummary();
-    if (tabName === 'log') {
-        document.getElementById('logDateFilter').value = ''; 
-        renderLog();
+    try {
+        transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
+        sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
+    } catch (e) {
+        console.error("Data Corrupted", e);
+        transactions = [];
+        sessions = [];
     }
 }
+
+// 2. ฟังก์ชันสลับ Tab ตาม URL Hash (#)
+function handleRouting() {
+    const hash = window.location.hash.replace('#', '') || 'record';
+    
+    // ซ่อนทุกหน้า
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+
+    // แสดงหน้าตาม Hash
+    const targetTab = document.getElementById(`tab-${hash}`);
+    const targetBtn = document.getElementById(`btn-${hash}`);
+    
+    if (targetTab && targetBtn) {
+        targetTab.classList.add('active');
+        targetBtn.classList.add('active');
+    }
+
+    // จัดการ Footer
+    const footer = document.querySelector('.footer-summary');
+    if (footer) footer.style.display = (hash === 'record') ? 'block' : 'none';
+
+    // โหลดข้อมูลใหม่ทุกครั้งที่เปลี่ยนหน้า (กันแคชข้อมูล)
+    loadData();
+    if (hash === 'record') updateUI();
+    if (hash === 'summary') renderSummary();
+    if (hash === 'log') renderLog();
+}
+
+// ตรวจจับการเปลี่ยน URL
+window.addEventListener('hashchange', handleRouting);
+window.addEventListener('load', handleRouting);
 
 function setMode(mode) {
     currentMode = mode;
@@ -39,18 +55,10 @@ function setMode(mode) {
     document.getElementById('return-section').style.display = isW ? 'none' : 'block';
 }
 
-function handleReturn() {
-    const input = document.getElementById('returnAmount');
-    const amt = parseInt(input.value);
-    if (!amt) return alert("ระบุยอดเงินด้วยครับ");
-    saveEntry(amt);
-    input.value = '';
-}
-
 function saveEntry(amount) {
     const nameInput = document.getElementById('userName');
     const name = nameInput.value.trim();
-    if (!name) return alert("กรุณาใส่ชื่อคนเบิก/คืน"), nameInput.focus();
+    if (!name) return alert("กรุณาใส่ชื่อ");
 
     const newTx = {
         id: Date.now(),
@@ -61,7 +69,7 @@ function saveEntry(amount) {
     };
 
     transactions.push(newTx);
-    saveToStorage();
+    saveData();
     updateUI();
 }
 
@@ -69,7 +77,6 @@ function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
     body.innerHTML = '';
-    
     [...transactions].reverse().forEach(t => {
         const isW = t.type === 'withdraw';
         body.insertAdjacentHTML('beforeend', `
@@ -81,42 +88,44 @@ function updateUI() {
             </tr>
         `);
     });
-
     const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
     document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
-// 🚩 ฟังก์ชันจบรอบ (หัวใจของการใช้ได้หลายรอบ)
-function endRound() {
-    if (transactions.length === 0) return alert("ยังไม่มีรายการบันทึกในรอบนี้");
-    
-    if (!confirm("ต้องการจบยอดรอบนี้ใช่ไหม? ข้อมูลจะถูกย้ายไปที่หน้า 'ประวัติรอบ' และล้างหน้านี้เพื่อเริ่มรอบใหม่")) return;
+function renderLog() {
+    const container = document.getElementById('logList');
+    const filter = document.getElementById('logDateFilter').value;
+    if (sessions.length === 0) return container.innerHTML = '';
 
-    // 1. คำนวณสรุปของรอบนี้
-    const summary = {};
-    transactions.forEach(t => {
-        if (!summary[t.name]) summary[t.name] = 0;
-        summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
-    });
+    let filtered = sessions;
+    if (filter) {
+        filtered = sessions.filter(s => {
+            try {
+                if (!s.id) return false;
+                return new Date(s.id).toISOString().split('T')[0] === filter;
+            } catch(e) { return false; }
+        });
+    }
 
-    const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
+    if (filter && filtered.length === 0) {
+        container.innerHTML = '<p class="empty-msg">❌ ไม่พบข้อมูล</p>';
+        return;
+    }
 
-    // 2. เก็บเข้า Session Log
-    const newSession = {
-        id: Date.now(),
-        date: new Date().toLocaleString('th-TH'),
-        total: total,
-        details: summary
-    };
+    container.innerHTML = filtered.map(s => `
+        <div class="log-card">
+            <div class="log-date">🕒 ${s.date || 'ไม่มีวันที่'}</div>
+            <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${(s.total || 0).toLocaleString()} ฿</div>
+            <div class="log-details">${s.details ? Object.keys(s.details).map(n => `<span>${n}: ${s.details[n].toLocaleString()}</span>`).join('') : ''}</div>
+        </div>
+    `).join('');
+}
 
-    sessions.unshift(newSession); // เพิ่มเข้าข้างหน้า
-    transactions = []; // ล้างรายการปัจจุบัน
-
-    // 3. บันทึกและเปลี่ยนหน้า
-    saveToStorage();
-    updateUI();
-    switchTab('log');
-    alert("ปิดยอดสำเร็จ! เริ่มรอบใหม่ได้เลย");
+function handleReturn() {
+    const val = parseInt(document.getElementById('returnAmount').value);
+    if (!val) return alert("ใส่ยอดเงินด้วย");
+    saveEntry(val);
+    document.getElementById('returnAmount').value = '';
 }
 
 function renderSummary() {
@@ -127,41 +136,26 @@ function renderSummary() {
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
     const keys = Object.keys(summary);
-    if (keys.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ไม่มีข้อมูลรอบปัจจุบัน</p>';
-    
-    container.innerHTML = keys.map(name => `
-        <div class="person-card">
-            <span>${name}</span>
-            <strong>${summary[name].toLocaleString()} ฿</strong>
-        </div>
-    `).join('');
+    container.innerHTML = keys.length ? keys.map(n => `<div class="person-card"><span>${n}</span><strong>${summary[n].toLocaleString()} ฿</strong></div>`).join('') : '';
 }
 
-function renderLog() {
-    const container = document.getElementById('logList');
-    const filter = document.getElementById('logDateFilter').value;
-    
-    if (sessions.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:40px;">ไม่มีประวัติรอบที่จบไปแล้ว</p>';
+function endRound() {
+    if (!transactions.length) return alert("ไม่มีข้อมูล");
+    if (!confirm("จบยอด?")) return;
+    const summary = {};
+    transactions.forEach(t => {
+        if (!summary[t.name]) summary[t.name] = 0;
+        summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
+    });
+    sessions.unshift({ id: Date.now(), date: new Date().toLocaleString('th-TH'), total: transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0), details: summary });
+    transactions = [];
+    saveData();
+    location.hash = 'log'; // เปลี่ยนหน้าไปหน้า Log
+}
 
-    let filtered = sessions;
-    if (filter) {
-        filtered = sessions.filter(s => new Date(s.id).toISOString().split('T')[0] === filter);
-    }
-
-    if (filter && filtered.length === 0) {
-        container.innerHTML = '<div class="empty-msg">❌ ไม่พบข้อมูลในวันที่เลือก</div>';
-        return;
-    }
-
-    container.innerHTML = filtered.map(s => `
-        <div class="log-card">
-            <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
-            <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿</div>
-            <div class="log-details">
-                ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name].toLocaleString()}</span>`).join('')}
-            </div>
-        </div>
-    `).join('');
+function saveData() {
+    localStorage.setItem('myTransactions', JSON.stringify(transactions));
+    localStorage.setItem('mySessions', JSON.stringify(sessions));
 }
 
 function clearFilter() {
@@ -169,7 +163,10 @@ function clearFilter() {
     renderLog();
 }
 
-function saveToStorage() {
-    localStorage.setItem('myTransactions', JSON.stringify(transactions));
-    localStorage.setItem('mySessions', JSON.stringify(sessions));
+// ☢️ ปุ่มไม้ตายสำหรับล้างข้อมูลเน่ากรณีหน้าจอค้าง
+function nuclearReset() {
+    if(confirm("ล้างข้อมูลประวัติทั้งหมดเพื่อซ่อมระบบที่ค้างใช่ไหม? (ข้อมูลจะหายหมด)")) {
+        localStorage.clear();
+        location.reload();
+    }
 }
