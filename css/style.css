@@ -1,58 +1,60 @@
-/* 🎨 Tally-PK Financial App Design System */
+/* 🎨 Tally-PK: Mobile App Web View Design */
 :root {
-    --primary-color: #6C5CE7; /* Bright Purple like image_9.png */
-    --primary-hover: #5A4FCF;
-    --withdraw-color: #EF4444; /* Red for withdraw (-) */
-    --return-color: #10B981; /* Green for return (+) */
-    --text-color: #2D3436;
-    --text-color-sub: #636E72;
-    --text-color-light: #ffffff;
-    --bg-color-app: #ffffff;
-    --bg-color-footer: #F2F1FF; /* Light purple for footer */
-    --border-color: #DFE6E9;
-    --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.05);
-    --shadow-hard: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --radius-full: 50px;
-    --radius-med: 15px;
+    --primary: #6C5CE7;       /* สีม่วงหลักแบบในรูป */
+    --primary-light: #F2F1FF;
+    --withdraw: #ef4444;       /* สีแดงเบิก (-) */
+    --return: #10b981;         /* สีเขียวคืน (+) */
+    --bg-frame: #1a1a1a;       /* สีพื้นหลังภายนอกตัวเว็บ (จำลอง Desktop) */
+    --bg-app: #ffffff;
+    --card-gray: #f8fafc;
+    --text-main: #2d3436;
+    --text-sub: #636e72;
+    --border: #dfe6e9;
+    --shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     font-family: 'Sarabun', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a; /* Dark background to mimic mobile device frame view */
-    color: var(--text-color);
+    background-color: var(--bg-frame); /* พื้นหลังด้านนอกดำเพื่อให้ดูเหมือน App */
+    color: var(--text-main);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
 }
 
-/* 📱 Main App Container (Mobile Web View Frame) */
+/* 📱 Container คุมความกว้างให้เหมือน App */
 .app-container {
-    background-color: var(--bg-color-app);
     width: 100%;
-    max-width: 450px; /* Fixed mobile-like width */
-    height: 95vh; /* Near-full screen height */
-    border-radius: 30px; /* Rounded corners like a phone */
-    overflow: hidden; /* Important for header corners */
-    box-shadow: var(--shadow-hard);
+    max-width: 450px;
+    height: 95vh;
+    background: white;
     display: flex;
     flex-direction: column;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
-/* 📍 Header - Vibrant Purple Style like image_9.png */
-.header {
-    background-color: var(--primary-color);
+/* 📍 Header - สีม่วงแบบรูปขวา */
+.main-header {
+    background: var(--primary);
     padding: 30px 20px 20px;
-    color: var(--text-color-light);
+    color: white;
     text-align: center;
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.header h1 {
+.main-header h1 {
     font-size: 1.5rem;
     margin: 0 0 20px;
     display: flex;
@@ -61,77 +63,93 @@ body {
     gap: 12px;
 }
 
-/* Tab Navigation - Light Purple on Header */
+/* Tab Nav */
 .tab-nav {
     display: flex;
-    background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    background: rgba(255, 255, 255, 0.2);
     padding: 5px;
-    border-radius: var(--radius-full);
+    border-radius: 50px;
 }
 
-.tab-nav button {
+.tab-item {
     flex: 1;
     border: none;
-    background: transparent;
-    color: #D3CFFB; /* Light purple text */
     padding: 12px;
-    border-radius: var(--radius-full);
-    font-size: 0.9rem;
+    border-radius: 50px;
     cursor: pointer;
+    font-size: 0.9rem;
     font-weight: 700;
-    transition: 0.2s;
+    color: #d3cffb;
+    background: transparent;
+    transition: 0.3s;
 }
 
-.tab-nav button.active {
-    background-color: var(--text-color-light);
-    color: var(--primary-color);
-    box-shadow: var(--shadow-soft);
+.tab-item.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 /* 📝 Content Area */
-.content {
+.content-area {
+    padding: 25px 20px 120px;
     flex: 1;
-    overflow-y: auto; /* Enable scroll if content is long */
-    padding: 25px 20px;
+    overflow-y: auto; /* เลื่อนดูประวัติได้ภายใน App */
 }
 
-/* Inputs & Labels */
-.form-group {
-    margin-bottom: 25px;
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
 }
 
-label {
+.tab-content.active {
     display: block;
-    font-size: 0.95rem;
-    color: var(--text-color-sub);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 
-input[type="text"], input[type="number"] {
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ⌨️ Form Elements - ปรับสีม่วงตามบรีฟ */
+.label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: var(--text-sub);
+}
+
+.main-input {
     width: 100%;
     padding: 16px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-med);
+    border: 2px solid var(--border);
+    border-radius: 15px;
     font-size: 1.1rem;
-    font-family: inherit;
-    box-sizing: border-box;
-    transition: 0.2s;
-}
-
-input[type="text"]:focus, input[type="number"]:focus {
-    border-color: var(--primary-color);
+    margin-bottom: 25px;
     outline: none;
+    transition: 0.2s;
+    font-family: inherit;
+    color: var(--text-main);
 }
 
-input[type="text"]::placeholder {
-    color: #b2bec3;
+.main-input:focus {
+    border-color: var(--primary);
 }
 
-/* Toggle Buttons for withdraw/return */
-.toggle-group {
+/* ✅ ✅ ✅ ไฮไลท์การแก้สีตามรูปขวา ✅ ✅ ✅ */
+/* 1. ช่อง Name เป็นสีม่วง ตัวหนังสือขาว */
+input#userName {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+}
+input#userName::placeholder {
+    color: #b2bec3; /* สี Placeholder ให้ยังพอเห็น */
+}
+
+/* 2. ปุ่มโหมด เบิกเงิน (เมื่อ active) เป็นสีม่วง */
+.action-toggle {
     display: flex;
     gap: 15px;
     margin-bottom: 25px;
@@ -140,91 +158,102 @@ input[type="text"]::placeholder {
 .toggle-btn {
     flex: 1;
     padding: 15px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-med);
+    border: 2px solid var(--border);
+    border-radius: 15px;
     background: white;
     font-weight: bold;
-    color: var(--text-color-sub);
     cursor: pointer;
+    color: var(--text-sub);
 }
 
-.toggle-btn.active {
-    border-color: var(--primary-color);
-    background-color: #F8F7FF;
-    color: var(--primary-color);
+.toggle-btn.active#modeWithdraw {
+    border-color: var(--primary);
+    background-color: var(--primary); /* สีม่วงตามรูป */
+    color: white; /* ตัวหนังสือขาวตามรูป */
 }
 
-/* 🔘 Submit Button - Bright Purple */
+.toggle-btn#modeReturn.active {
+    border-color: var(--return);
+    background-color: #f0fff4;
+    color: var(--return);
+}
+
+/* 🔘 Submit Button */
 .btn-submit {
-    background-color: var(--primary-color);
-    color: var(--text-color-light);
-    border: none;
     width: 100%;
     padding: 20px;
-    border-radius: var(--radius-med);
+    border: none;
+    border-radius: 15px;
     font-size: 1.15rem;
-    font-weight: 700;
+    font-weight: bold;
+    color: white;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(108, 92, 231, 0.2);
-    transition: 0.2s;
 }
 
-.btn-submit:hover {
-    background-color: var(--primary-hover);
+.btn-withdraw { background: var(--withdraw); }
+.btn-return { background: var(--return); }
+
+/* 📊 Summary Card */
+.history-card {
+    background: var(--card-gray);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
 }
 
-.btn-submit:active {
-    transform: translateY(1px);
-}
-
-/* 📜 History Area */
-.history-title {
-    font-size: 1rem;
-    color: var(--text-color-sub);
-    margin: 30px 0 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-table {
+/* 📜 History Table */
+.history-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-table th {
+.history-table th {
     text-align: left;
-    padding: 12px 10px;
+    padding: 10px;
     font-size: 0.85rem;
-    color: var(--text-color-sub);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--text-sub);
+    border-bottom: 1px solid var(--border);
 }
 
-table td {
+.history-table td {
     padding: 16px 10px;
-    border-bottom: 1px solid #F9FAFB;
+    border-bottom: 1px solid #f8fafc;
 }
 
-table td span.withdraw { color: var(--withdraw-color); font-weight: bold; }
-table td span.return { color: var(--return-color); font-weight: bold; }
+.t-red { color: var(--withdraw); font-weight: bold; }
+.t-green { color: var(--return); font-weight: bold; }
 
-/* 💰 Footer Area - Light Purple with Dark Green Text */
-.footer-container {
-    padding: 20px 20px;
-    background-color: var(--bg-color-footer);
-    text-align: center;
-    margin-top: auto;
+/* 💰 Sticky Footer - สีเขียวเข้มเพื่อการอ่านง่าย */
+.footer-summary {
+    position: sticky;
+    bottom: 0;
+    background: var(--primary-light); /* สีม่วงอ่อนเพื่อให้ Footer แยก Layer */
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
 }
 
-.footer-container p {
-    font-size: 0.9rem;
-    margin: 0 0 8px;
-    color: var(--text-color-sub);
-}
-
-.total-amount {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #1E8449; /* Dark green for positive total */
+.footer-summary h2 {
     margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e8449; /* สีเขียวเข้มสำหรับยอดบวก */
+}
+
+.btn-submit-save-purple {
+    background-color: var(--primary); /* สีม่วงตามรูป */
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 18px;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 10px;
+    cursor: pointer;
 }
