@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+// 🚩 Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCr9fXfx9m9cQ9_N_VhE3VTLbgdk3ZXRKM",
     authDomain: "tally-pk.firebaseapp.com",
@@ -18,13 +19,13 @@ let currentMode = 'withdraw';
 let transactions = [];
 let sessions = [];
 
-// 🆔 สร้าง DeviceID เพื่อรวมกลุ่มยอดต่อคน (ป้องกันปัญหาพิมพ์ชื่อ มด/Mod แยกกัน)
+// 🆔 สร้าง DeviceID เพื่อใช้รวมกลุ่มยอดต่อคน (ต่อให้เปลี่ยนชื่อ ยอดก็ยังรวมกัน)
 if (!localStorage.getItem('myDeviceID')) {
     localStorage.setItem('myDeviceID', 'dev-' + Date.now() + Math.random().toString(36).substr(2, 5));
 }
 const myDeviceID = localStorage.getItem('myDeviceID');
 
-// 📱 ฟังก์ชันจับรุ่นมือถือ (อัปเดตใหม่ให้แม่นยำขึ้น)
+// 📱 ฟังก์ชันตรวจจับรุ่นเครื่อง (ปรับปรุงให้ดึงชื่อรุ่นได้ละเอียดขึ้น)
 const getDeviceInfo = () => {
     const ua = navigator.userAgent;
     if (/iPhone/i.test(ua)) return "iPhone";
@@ -57,6 +58,8 @@ onValue(ref(db, 'sessions'), (snapshot) => {
 });
 
 // --- Actions ---
+
+// ✅ ปลดล็อกชื่อให้แก้ไขได้
 window.enableNameEdit = () => {
     const nameInput = document.getElementById('userName');
     nameInput.disabled = false;
@@ -76,17 +79,19 @@ window.setMode = (mode) => {
 window.saveEntry = (amount) => {
     const nameInput = document.getElementById('userName');
     const newName = nameInput.value.trim();
-    if (!newName) return alert("กรุณาใส่ชื่อก่อนครับ"), nameInput.focus();
+    if (!newName) return alert("กรุณาใส่ชื่อก่อนบันทึกครับ"), nameInput.focus();
 
+    // 🚩 ตรวจสอบการเปลี่ยนชื่อเพื่อเก็บ Log (Audit Trail)
     const oldName = localStorage.getItem('myTallyName');
     let renameNote = (oldName && oldName !== newName) ? `Changed from ${oldName}` : null;
 
+    // ✅ จำชื่อลงเครื่อง และล็อกช่อง (Dim) ทันที
     localStorage.setItem('myTallyName', newName);
     nameInput.disabled = true;
 
     const newTx = {
         id: Date.now(),
-        deviceId: myDeviceID,
+        deviceId: myDeviceID, // ใช้ ID นี้เป็นตัวเชื่อม มด และ Mod
         time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
         name: newName,
         type: currentMode,
@@ -101,18 +106,20 @@ window.saveEntry = (amount) => {
 window.handleReturn = () => {
     const input = document.getElementById('returnAmount');
     const amt = parseInt(input.value);
-    if (!amt) return alert("ระบุยอดเงินคืนด้วยครับ");
+    if (!amt) return alert("ระบุยอดเงินด้วยครับ");
     window.saveEntry(amt);
     input.value = '';
 };
 
-// 1️⃣ หน้าบันทึก: แสดง "ชื่อ - รุ่น"
+// 1️⃣ หน้าบันทึก: แสดงชื่อคู่กับรุ่นเครื่อง
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
+    
     body.innerHTML = transactions.slice().reverse().map(t => {
         const isW = t.type === 'withdraw';
         const deviceSuffix = t.device ? ` - ${t.device}` : '';
+        
         return `
             <tr>
                 <td style="font-size:0.75rem; color:#94a3af;">${t.time}</td>
@@ -120,7 +127,9 @@ function updateUI() {
                     <strong>${t.name}${deviceSuffix}</strong>
                     ${t.renameNote ? `<br><small style="font-size:0.6rem; color:#cbd5e1; font-style:italic;">${t.renameNote}</small>` : ''}
                 </td>
-                <td class="${isW ? 't-red' : 't-green'}">${isW ? '-' : '+'}${t.amount.toLocaleString()}</td>
+                <td class="${isW ? 't-red' : 't-green'}">
+                    ${isW ? '-' : '+'}${t.amount.toLocaleString()}
+                </td>
                 <td class="khit-col">${t.amount / 200} ขีด</td>
             </tr>
         `;
@@ -132,23 +141,39 @@ function updateUI() {
     grandTotalEl.style.color = total >= 0 ? '#10b981' : '#ef4444';
 }
 
-// 2️⃣ หน้าสรุปรายคน: รวมกลุ่มยอดด้วย DeviceID
+// 2️⃣ หน้าสรุปรายคน: รวมกลุ่มยอดด้วย DeviceID (แก้ปัญหา มด/Mod แยกกัน)
 function renderSummary() {
     const container = document.getElementById('summaryList');
     if (!container) return;
+    
     const summary = {};
     transactions.forEach(t => {
         const key = t.deviceId || t.name;
-        if (!summary[key]) summary[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
-        if (t.id >= summary[key].lastTime) { summary[key].name = t.name; summary[key].lastTime = t.id; }
+        
+        if (!summary[key]) {
+            summary[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
+        }
+        
+        if (t.id >= summary[key].lastTime) {
+            summary[key].name = t.name;
+            summary[key].lastTime = t.id;
+        }
+
         if (t.type === 'withdraw') summary[key].withdraw += t.amount;
         else summary[key].return += t.amount;
     });
     
-    container.innerHTML = Object.keys(summary).map(key => {
+    const keys = Object.keys(summary);
+    if (keys.length === 0) {
+        container.innerHTML = '<div class="empty-msg"><p>ยังไม่มีข้อมูลในรอบนี้</p></div>';
+        return;
+    }
+
+    container.innerHTML = keys.map(key => {
         const data = summary[key];
-        const net = data.return - data.withdraw;
+        const net = data.return - data.withdraw; 
         const numColor = net >= 0 ? '#10b981' : '#ef4444';
+
         return `
             <div class="person-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px;">
@@ -158,7 +183,7 @@ function renderSummary() {
                         <strong style="font-size: 1.2em; color: ${numColor};">${net >= 0 ? '+' : ''}${net.toLocaleString()} ฿</strong>
                     </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-top:10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-top: 10px;">
                     <div>เบิก: <strong style="color: #ef4444;">-${data.withdraw.toLocaleString()}</strong></div>
                     <div>คืน: <strong style="color: #10b981;">+${data.return.toLocaleString()}</strong></div>
                 </div>
@@ -169,27 +194,56 @@ function renderSummary() {
 
 window.endRound = () => {
     if (!transactions.length || !confirm("จบยอดรอบนี้และเริ่มรอบใหม่?")) return;
+    
     const finalSum = {};
     transactions.forEach(t => {
         const key = t.deviceId || t.name;
-        if (!finalSum[key]) finalSum[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
-        if (t.id >= finalSum[key].lastTime) { finalSum[key].name = t.name; finalSum[key].lastTime = t.id; }
+        if (!finalSum[key]) {
+            finalSum[key] = { name: t.name, withdraw: 0, return: 0, lastTime: t.id };
+        }
+        if (t.id >= finalSum[key].lastTime) {
+            finalSum[key].name = t.name;
+            finalSum[key].lastTime = t.id;
+        }
         if (t.type === 'withdraw') finalSum[key].withdraw += t.amount;
         else finalSum[key].return += t.amount;
     });
+
     const total = transactions.reduce((sum, t) => sum + (t.type === 'withdraw' ? -t.amount : t.amount), 0);
-    push(ref(db, 'sessions'), { id: Date.now(), date: new Date().toLocaleString('th-TH'), total, details: finalSum });
+    
+    push(ref(db, 'sessions'), { 
+        id: Date.now(), 
+        date: new Date().toLocaleString('th-TH'), 
+        total, 
+        details: finalSum 
+    });
     remove(ref(db, 'transactions'));
     location.hash = 'log';
 };
 
-// 3️⃣ หน้าประวัติรอบ: รวมกลุ่มยอดตามที่บันทึกไว้ใน Session
+// 3️⃣ หน้าประวัติรอบ: แจ้งเตือนเมื่อไม่พบรายการ
 window.renderLog = () => {
     const container = document.getElementById('logList');
     const filterValue = document.getElementById('logDateFilter').value;
-    if (!container || sessions.length === 0) return;
+    if (!container) return;
+
+    if (sessions.length === 0) {
+        container.innerHTML = '<div class="empty-msg"><p>ไม่มีประวัติการจบยอด</p></div>';
+        return;
+    }
+
     let filtered = sessions;
-    if (filterValue) filtered = sessions.filter(s => new Date(s.id).toISOString().split('T')[0] === filterValue);
+    if (filterValue) {
+        filtered = sessions.filter(s => {
+            const sessionDate = new Date(s.id).toISOString().split('T')[0];
+            return sessionDate === filterValue;
+        });
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-msg"><p>ไม่พบรายการของวันที่เลือก</p></div>';
+        return;
+    }
 
     container.innerHTML = filtered.map(s => `
         <div class="log-card">
@@ -224,7 +278,10 @@ function handleRouting() {
 window.addEventListener('load', () => {
     const nameInput = document.getElementById('userName');
     const savedName = localStorage.getItem('myTallyName');
-    if (savedName) { nameInput.value = savedName; nameInput.disabled = true; }
+    if (savedName) {
+        nameInput.value = savedName;
+        nameInput.disabled = true;
+    }
     handleRouting();
 });
 window.addEventListener('hashchange', handleRouting);
