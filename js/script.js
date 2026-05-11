@@ -69,7 +69,7 @@ window.handleReturn = () => {
     input.value = '';
 };
 
-// 1️⃣ หน้าบันทึก (Tab 1): เบิกเป็นลบ (-) | คืนเป็นบวก (+)
+// 1️⃣ หน้าบันทึก (Tab 1): ประวัติในรอบปัจจุบัน
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
@@ -88,7 +88,6 @@ function updateUI() {
         `;
     }).join('');
 
-    // ยอดรวมกองกลาง = (คืนทั้งหมด) - (เบิกทั้งหมด)
     const total = transactions.reduce((sum, t) => {
         return sum + (t.type === 'withdraw' ? -t.amount : t.amount);
     }, 0);
@@ -98,7 +97,7 @@ function updateUI() {
     grandTotalEl.style.color = total >= 0 ? '#10b981' : '#ef4444';
 }
 
-// 2️⃣ หน้าสรุป (Tab 2): อัปเดตสีตัวเลขเบิก/คืน ตามที่คุณต้องการ
+// 2️⃣ หน้าสรุป (Tab 2): ชื่อดำปกติ | เลขหลังชื่อเปลี่ยนสีตามค่าสุทธิ
 function renderSummary() {
     const container = document.getElementById('summaryList');
     if (!container) return;
@@ -118,14 +117,16 @@ function renderSummary() {
     
     container.innerHTML = keys.map(name => {
         const data = summary[name];
-        const net = data.return - data.withdraw; // คืน - เบิก
+        const net = data.return - data.withdraw; 
+        const numColor = net >= 0 ? '#10b981' : '#ef4444'; // สีเขียว/แดงสำหรับตัวเลข
+
         return `
             <div class="person-card" style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                    <strong style="font-size: 1.1em;">👤 ${name}</strong>
+                    <strong style="font-size: 1.1em; color: var(--text-main);">👤 ${name}</strong>
                     <div style="text-align: right;">
                         <div style="font-size: 0.8em; color: #94a3af; margin-bottom: 2px;">ยอดสุทธิ</div>
-                        <strong style="font-size: 1.2em; color: ${net >= 0 ? '#10b981' : '#ef4444'}">
+                        <strong style="font-size: 1.2em; color: ${numColor};">
                             ${net >= 0 ? '+' : ''}${net.toLocaleString()} ฿
                         </strong>
                     </div>
@@ -166,6 +167,7 @@ window.endRound = () => {
     location.hash = 'log';
 };
 
+// 3️⃣ หน้าประวัติ (Tab 3): ชื่อดำปกติ | เลขหลังชื่อเปลี่ยนสี
 window.renderLog = () => {
     const container = document.getElementById('logList');
     const filterValue = document.getElementById('logDateFilter').value;
@@ -196,7 +198,9 @@ window.renderLog = () => {
                 ${Object.keys(s.details).map(name => {
                     const d = s.details[name];
                     const net = d.return - d.withdraw;
-                    return `<span>${name}: <strong>${net >= 0 ? '+' : ''}${net.toLocaleString()}</strong></span>`;
+                    const logNumColor = net >= 0 ? '#10b981' : '#ef4444';
+                    // 🚩 ชื่อดำปกติ แต่เลขหลังชื่อเปลี่ยนสี
+                    return `<span>${name}: <strong style="color: ${logNumColor}">${net >= 0 ? '+' : ''}${net.toLocaleString()}</strong></span>`;
                 }).join('')}
             </div>
         </div>
