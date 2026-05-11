@@ -2,7 +2,6 @@
     --primary: #4f46e5;
     --success: #10b981;
     --danger: #ef4444;
-    --dark: #1e293b;
     --bg: #f1f5f9;
 }
 
@@ -40,7 +39,6 @@ body {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Spacing ปรับตามที่ขอ */
 .input-group { margin-bottom: 35px; }
 .label { font-size: 0.85rem; font-weight: bold; color: #64748b; margin-bottom: 12px; display: block; }
 
@@ -67,7 +65,6 @@ body {
 .btn-withdraw { background: var(--primary); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
 .btn-return { background: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
 
-/* Table & Log */
 .history-container { margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
 .history-table { width: 100%; border-collapse: collapse; }
 .history-table th { text-align: left; font-size: 0.75rem; color: #94a3af; padding: 12px 8px; border-bottom: 1px solid #f1f5f9; }
@@ -82,53 +79,20 @@ body {
     background: #f8fafc; border-radius: 12px; margin-bottom: 10px; border: 1px solid #f1f5f9;
 }
 .btn-end-round {
-    width: 100%; padding: 15px; background: var(--dark); color: white;
+    width: 100%; padding: 15px; background: #1e293b; color: white;
     border: none; border-radius: 12px; margin-top: 30px; cursor: pointer; font-weight: bold;
 }
+
+.filter-area { display: flex; gap: 10px; margin-bottom: 20px; }
+.filter-input { flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: 'Sarabun'; }
+.btn-clear-filter { padding: 10px; background: #f1f5f9; border: none; border-radius: 10px; color: #64748b; cursor: pointer; }
 
 .log-card { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
 .log-date { font-size: 0.7rem; color: #94a3af; }
 .log-details { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .log-details span { font-size: 0.75rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
 
-.footer-summary { background: #f0fdf4; padding: 20px; text-align: center; border-top: 1px solid #dcfce7; }
-.footer-summary h2 { margin: 5px 0 0; color: #166534; font-size: 2.2rem; }
-
-/* ส่วนกรองวันที่ */
-.filter-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.filter-input {
-    flex: 1;
-    padding: 10px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-family: 'Sarabun', sans-serif;
-}
-
-.btn-clear-filter {
-    padding: 10px 15px;
-    background: #f1f5f9;
-    border: none;
-    border-radius: 10px;
-    color: #64748b;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.empty-msg {
-    text-align: center;
-    color: #94a3af;
-    padding: 40px 0;
-}
-
-/* ปรับปรุง Footer ให้ซ่อนได้เนียนๆ */
-.footer-summary {
-    transition: 0.3s;
-}
+/* ดีไซน์ของข้อความ "ไม่พบข้อมูล" */
 .empty-msg {
     text-align: center;
     color: #94a3af;
@@ -137,5 +101,7 @@ body {
     border-radius: 12px;
     border: 2px dashed #e2e8f0;
     margin-top: 10px;
-    font-size: 0.9rem;
 }
+
+.footer-summary { background: #f0fdf4; padding: 20px; text-align: center; border-top: 1px solid #dcfce7; }
+.footer-summary h2 { margin: 5px 0 0; color: #166534; font-size: 2.2rem; }
