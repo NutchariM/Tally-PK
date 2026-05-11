@@ -1,95 +1,230 @@
+/* 🎨 Tally-PK: Final Modern & Clean UI */
 :root {
-    --primary: #6C5CE7;
-    --withdraw: #ff4757;
-    --return: #2ed573;
-    --bg: #F8F9FD;
-    --border: #f1f2f6;
-    --radius: 12px;
+    --primary: #6C5CE7;        /* สีม่วงที่คุณชอบ */
+    --primary-soft: #F2F1FF;
+    --withdraw: #ff4757;       /* สีแดงเบิก */
+    --return: #2ed573;         /* สีเขียวคืน */
+    --bg-app: #F8F9FD;        /* สีพื้นหลังแอป (เทาจางๆ) */
+    --text-main: #2D3436;
+    --text-sub: #A4B0BE;
+    --border: #EDF2F7;
+    --radius: 20px;            /* ความโค้งมนที่ดูพอดี */
+    --shadow: 0 10px 25px rgba(0,0,0,0.03);
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+}
 
 body {
-    font-family: 'Sarabun', sans-serif;
-    margin: 0; background-color: #121212;
-    display: flex; justify-content: center;
+    font-family: 'Sarabun', -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a; /* พื้นหลัง Desktop */
+    display: flex;
+    justify-content: center;
 }
 
+/* 📱 Container: จำลองหน้าจอมือถือ */
 .app-container {
-    width: 100%; max-width: 450px; height: 100dvh;
-    background: var(--bg); display: flex; flex-direction: column;
-    overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
+    height: 100dvh; /* ป้องกันแถบ Safari บังด้านล่าง */
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.3);
 }
 
-/* Header & Tab ม่วง */
+/* 📍 Header & Tabs */
 .main-header {
     background: var(--primary);
-    padding: 25px 20px 15px; color: white; text-align: center;
+    padding: 25px 20px 15px;
+    color: white;
+    text-align: center;
+    flex-shrink: 0;
 }
 
-.main-header h1 { font-size: 1.4rem; margin: 0 0 15px; font-weight: 800; }
+.main-header h1 {
+    font-size: 1.4rem;
+    margin: 0 0 15px;
+    font-weight: 800;
+}
 
 .tab-nav {
-    display: flex; background: rgba(0, 0, 0, 0.1);
-    padding: 4px; border-radius: 50px;
+    display: flex;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 4px;
+    border-radius: 100px;
 }
 
 .tab-item {
-    flex: 1; border: none; padding: 10px; border-radius: 50px;
-    font-size: 0.9rem; font-weight: 700; color: rgba(255, 255, 255, 0.6);
-    background: transparent; cursor: pointer;
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    transition: 0.3s;
 }
 
-.tab-item.active { background: white; color: var(--primary); }
+.tab-item.active {
+    background: white;
+    color: var(--primary);
+}
 
-/* Content Area */
-.content-area { padding: 20px; flex: 1; overflow-y: auto; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+/* 📝 Content Area */
+.content-area {
+    padding: 24px 20px;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
-/* Input Style แบบแอป ไม่โบราณ */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ⌨️ Form Elements: Modern & Minimal */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    text-transform: uppercase;
+}
+
 .main-input {
-    width: 100%; padding: 15px; border: 1.5px solid var(--border);
-    border-radius: var(--radius); background: white; font-size: 1.1rem;
-    outline: none; margin-bottom: 15px; -webkit-appearance: none;
+    width: 100%;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: white;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    outline: none;
+    transition: 0.2s;
+    font-family: inherit;
+    box-shadow: var(--shadow);
+    /* 🚩 ลบสไตล์เดิมของ Safari */
+    -webkit-appearance: none;
+    appearance: none;
 }
-.main-input:focus { border-color: var(--primary); }
-.label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.85rem; color: #a4b0be; }
 
-/* Toggle & Quick Buttons */
-.action-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
-.toggle-btn {
-    flex: 1; padding: 12px; border-radius: var(--radius);
-    border: 1px solid var(--border); background: white;
-    font-weight: 700; color: #a4b0be; cursor: pointer;
+.main-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
 }
+
+/* 🔘 Buttons & Toggles */
+.action-toggle {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: white;
+    font-weight: 700;
+    color: var(--text-sub);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
 .toggle-btn.active#modeWithdraw { background: var(--withdraw); color: white; border-color: var(--withdraw); }
 .toggle-btn.active#modeReturn { background: var(--return); color: white; border-color: var(--return); }
 
-.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn-amt {
-    padding: 18px; border: none; border-radius: var(--radius);
-    background: var(--primary); color: white; font-weight: 800; font-size: 1.1rem;
+.quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
 
-/* History Table (Modern Look) */
-.table-card { background: white; border-radius: var(--radius); padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-.history-table { width: 100%; border-collapse: collapse; }
-.history-table th { text-align: left; padding: 10px; font-size: 0.75rem; color: #a4b0be; border-bottom: 1px solid #f1f2f6; }
-.history-table td { padding: 14px 10px; border-bottom: 1px solid #f8fafc; }
+.btn-amt {
+    padding: 20px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 8px 15px rgba(108, 92, 231, 0.2);
+}
+
+.btn-amt:active { transform: scale(0.95); }
+
+/* 📊 Data Cards */
+.person-card, .table-card {
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid white;
+}
+
+/* 📜 History Table */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #F8F9FD;
+}
+
+.history-table tr:last-child td { border-bottom: none; }
 
 .t-red { color: var(--withdraw); font-weight: 800; }
 .t-green { color: var(--return); font-weight: 800; }
 
-/* Footer */
-.footer-summary { background: white; padding: 20px 25px; border-top: 1px solid var(--border); }
-.footer-flex { display: flex; justify-content: space-between; align-items: center; }
-.footer-flex p { margin: 0; font-size: 0.9rem; color: #a4b0be; font-weight: 700; }
-.footer-flex h2 { margin: 0; font-size: 1.7rem; font-weight: 900; }
+/* 💰 Footer Summary */
+.footer-summary {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.03);
+    flex-shrink: 0;
+}
 
-.btn-save { background: var(--return); color: white; border: none; border-radius: var(--radius); padding: 0 20px; font-weight: 700; }
-.flex-input { display: flex; gap: 10px; margin-bottom: 15px; }
-.flex-input input { margin-bottom: 0; }
+.footer-summary p { margin: 0; font-size: 0.9rem; color: var(--text-sub); font-weight: 700; }
+.footer-summary h2 { margin: 0; font-size: 1.8rem; font-weight: 900; }
 
-/* Card รายคนในหน้าสรุป */
-.person-card { background: white; padding: 15px; border-radius: var(--radius); margin-bottom: 10px; border: 1px solid var(--border); }
+/* Utility */
+.btn-end-round {
+    width: 100%; padding: 16px; background: #1e293b; color: white; border: none;
+    border-radius: var(--radius); font-weight: 700; margin-top: 20px;
+}
+
+.flex-input-group { display: flex; gap: 10px; }
+.btn-save-return { background: var(--return); color: white; border: none; border-radius: var(--radius); padding: 0 20px; font-weight: 700; }
