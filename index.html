@@ -3,60 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกการเงิน</title>
+    <title>Financial Tracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <header class="main-header">
-            <h1>💰 บันทึกการเบิก-คืน</h1>
-        </header>
 
-        <main class="content">
-            <section class="section">
-                <label class="section-label">👤 ชื่อผู้เบิก/คืน</label>
-                <input type="text" id="userName" class="main-input" placeholder="พิมพ์ชื่อตรงนี้...">
-            </section>
+<div class="app-container">
+    <header class="main-header">
+        <h1>💰 ระบบบันทึกเบิก-คืน</h1>
+        <div class="tab-nav">
+            <button class="tab-item active" onclick="switchTab('record')">บันทึก</button>
+            <button class="tab-item" onclick="switchTab('summary')">สรุปรายคน</button>
+            <button class="tab-item" onclick="switchTab('log')">ประวัติรอบ</button>
+        </div>
+    </header>
+
+    <main class="content-area">
+        <div id="tab-record" class="tab-content active">
+            <div class="input-group">
+                <label class="label">👤 ชื่อผู้เบิก/คืน</label>
+                <input type="text" id="userName" class="main-input" placeholder="พิมพ์ชื่อเพื่อเริ่มบันทึก...">
+            </div>
 
             <div class="action-toggle">
-                <button id="typeWithdraw" class="toggle-item active" onclick="changeType('withdraw')">เบิกเงิน</button>
-                <button id="typeReturn" class="toggle-item" onclick="changeType('return')">คืนเงิน</button>
+                <button id="modeWithdraw" class="toggle-btn active" onclick="setMode('withdraw')">เบิกเงิน</button>
+                <button id="modeReturn" class="toggle-btn" onclick="setMode('return')">คืนเงิน</button>
             </div>
 
-            <div class="action-area">
-                <button id="btnQuickWithdraw" class="btn-main-action" onclick="saveData(200)">
+            <div id="withdraw-section">
+                <button class="btn-submit btn-withdraw" onclick="saveEntry(200)">
                     บันทึกเบิกเงิน <strong>200 ฿</strong>
                 </button>
-
-                <div id="returnInputWrapper" class="input-wrapper" style="display: none;">
-                    <input type="number" id="returnAmount" class="main-input" placeholder="ระบุยอดเงินที่คืน" inputmode="numeric">
-                    <button class="btn-save-return" onclick="handleReturnSave()">บันทึกการคืน</button>
-                </div>
             </div>
 
-            <div class="total-display">
-                <p>ยอดรวมทั้งหมดวันนี้</p>
-                <h2 id="totalBaht">0 ฿</h2>
+            <div id="return-section" style="display: none;">
+                <input type="number" id="returnAmount" class="main-input" placeholder="ระบุยอดเงินที่คืน" inputmode="numeric">
+                <button class="btn-submit btn-return" onclick="handleReturn()" style="margin-top:10px;">บันทึกคืนเงิน</button>
             </div>
 
-            <section class="history-section">
-                <h3 class="section-label">📋 ประวัติรายการ</h3>
+            <div class="history-container">
+                <label class="label">🕒 ประวัติในรอบนี้</label>
                 <div class="table-wrapper">
-                    <table>
+                    <table class="history-table">
                         <thead>
                             <tr>
                                 <th>เวลา</th>
                                 <th>ชื่อ</th>
-                                <th>ประเภท</th>
-                                <th>จำนวนเงิน</th>
+                                <th>ยอด</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
                     </table>
                 </div>
-            </section>
-        </main>
-    </div>
-    <script src="js/script.js"></script>
+            </div>
+        </div>
+
+        <div id="tab-summary" class="tab-content">
+            <div class="summary-header">
+                <label class="label">📊 ยอดคงเหลือรายบุคคล</label>
+                <div class="summary-actions">
+                    <button class="btn-small" onclick="copySummary()"><i class="fa-regular fa-copy"></i> ก๊อปปี้</button>
+                </div>
+            </div>
+            <div id="summaryList" class="summary-grid"></div>
+            
+            <button class="btn-end-round" onclick="endRound()">
+                <i class="fa-solid fa-flag-checkered"></i> จบยอดและเริ่มรอบใหม่
+            </button>
+        </div>
+
+        <div id="tab-log" class="tab-content">
+            <label class="label">📜 ประวัติการจบยอด</label>
+            <div id="logList" class="log-grid"></div>
+        </div>
+    </main>
+
+    <footer class="footer-summary">
+        <p>ยอดรวมกองกลาง (รอบปัจจุบัน)</p>
+        <h2 id="grandTotal">0 ฿</h2>
+    </footer>
+</div>
+
+<script src="js/script.js"></script>
 </body>
 </html>
