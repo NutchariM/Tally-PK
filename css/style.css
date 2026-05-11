@@ -1,15 +1,16 @@
-/* 🎨 Tally-PK: Global Design System */
+/* 🎨 Tally-PK: Global Design System (v4.0) */
 :root {
-    --primary: #6366f1;
-    --withdraw: #ef4444; /* แดงสำหรับเบิก (-) */
-    --return: #10b981;   /* เขียวสำหรับคืน (+) */
+    --primary-start: #6366f1; /* ม่วงคราม */
+    --primary-end: #a855f7;   /* ม่วงสว่าง */
+    --withdraw: #ef4444;      /* แดงสำหรับเบิก (-) */
+    --return: #10b981;        /* เขียวสำหรับคืน (+) */
     --bg: #f8fafc;
     --card-bg: #ffffff;
     --text-main: #1e293b;
     --text-sub: #64748b;
     --border: #e2e8f0;
     --radius: 16px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -33,9 +34,9 @@ body {
     flex-direction: column;
 }
 
-/* 📍 Header: ปรับเป็นม่วง Gradient ไล่สีแบบทันสมัย */
+/* 📍 Header: ม่วง Gradient ไล่สี */
 .main-header {
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); 
+    background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%); 
     padding: 20px 15px 15px;
     position: sticky;
     top: 0;
@@ -44,9 +45,8 @@ body {
     text-align: center;
 }
 
-/* ปรับสีตัวหนังสือ Header เป็นขาว */
 .main-header h1 {
-    color: white !important; /* ใช้ !important เพื่อความชัวร์ */
+    color: white !important;
     font-size: 1.4rem;
     margin: 0 0 15px;
     display: flex;
@@ -56,11 +56,11 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-/* ปรับแถบ Tab ให้ดูใสๆ (Glassmorphism) เข้ากับสีม่วง */
+/* 🧭 Modern Tab Navigation (Glassmorphism) */
 .tab-nav {
     display: flex;
-    background: rgba(255, 255, 255, 0.15); /* พื้นหลังโปร่งแสง */
-    backdrop-filter: blur(8px); /* เบลอหลังแถบปุ่ม */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     padding: 4px;
     border-radius: 12px;
@@ -68,7 +68,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* สีตัวหนังสือในปุ่มตอนยังไม่กด */
 .tab-item {
     flex: 1;
     border: none;
@@ -82,11 +81,24 @@ body {
     transition: 0.3s;
 }
 
-/* สีปุ่มตอนกดเลือกแล้ว */
 .tab-item.active {
     background: white !important;
-    color: #6366f1 !important;
+    color: var(--primary-start) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 📝 Content Area */
+.content-area {
+    padding: 20px 15px 120px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -116,7 +128,7 @@ body {
 }
 
 .main-input:focus {
-    border-color: var(--primary);
+    border-color: var(--primary-start);
     background: white;
 }
 
@@ -138,9 +150,9 @@ body {
 }
 
 .toggle-btn.active {
-    border-color: var(--primary);
+    border-color: var(--primary-start);
     background: #eef2ff;
-    color: var(--primary);
+    color: var(--primary-start);
 }
 
 /* 🔘 Submit Buttons */
@@ -160,8 +172,8 @@ body {
 .btn-return { background: var(--return); }
 .btn-submit:active { transform: scale(0.97); }
 
-/* 📊 Summary Cards (Tab 2) */
-.person-card {
+/* 📊 Summary & History Cards */
+.person-card, .log-card {
     background: white;
     padding: 20px;
     border-radius: var(--radius);
@@ -170,33 +182,6 @@ body {
     box-shadow: var(--shadow);
 }
 
-.summary-columns {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed var(--border);
-}
-
-.col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.col span {
-    font-size: 0.75rem;
-    color: var(--text-sub);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.net-amount {
-    font-size: 1.3rem;
-    font-weight: 800;
-}
-
-/* 📜 History Table (Tab 1) */
 .history-table {
     width: 100%;
     border-collapse: collapse;
@@ -215,10 +200,11 @@ body {
     border-bottom: 1px solid #f1f5f9;
 }
 
+/* 🎨 Text Colors */
 .t-red { color: var(--withdraw); font-weight: bold; }
 .t-green { color: var(--return); font-weight: bold; }
 
-/* 📅 Filter Area (Tab 3) - ปรับปรุงใหม่ */
+/* 📅 Filter Area */
 .filter-area {
     display: flex;
     gap: 10px;
@@ -227,16 +213,6 @@ body {
     padding: 12px;
     border-radius: 14px;
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.filter-input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 1rem;
-    outline: none;
 }
 
 .btn-clear-filter {
@@ -249,25 +225,7 @@ body {
     cursor: pointer;
 }
 
-/* 📜 Log Cards (Tab 3) - ปรับปรุงใหม่ */
-.log-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--radius);
-    margin-bottom: 15px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.log-date {
-    font-size: 0.8rem;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
+/* 📜 Log Details */
 .log-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -286,7 +244,7 @@ body {
     justify-content: space-between;
 }
 
-/* 💰 Footer Area */
+/* 💰 Sticky Footer Summary */
 .footer-summary {
     position: fixed;
     bottom: 0;
@@ -297,10 +255,11 @@ body {
     background: white;
     padding: 20px;
     border-top: 1px solid var(--border);
-    display: flex;
+    display: flex; /* เปลี่ยนเป็น flex ตามที่ JS สั่งไว้ */
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+    z-index: 100;
 }
 
 .footer-summary h2 {
@@ -319,17 +278,4 @@ body {
     border-radius: 12px;
     font-weight: bold;
     margin-top: 30px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 80px 20px;
-    color: #94a3af;
-}
-
-.empty-state i {
-    font-size: 3.5rem;
-    margin-bottom: 15px;
-    display: block;
-    opacity: 0.2;
 }
