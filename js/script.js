@@ -1,23 +1,52 @@
 let currentMode = 'withdraw';
-let transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
-let sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
+let transactions = [];
+let sessions = [];
 
+// ฟังก์ชันโหลดข้อมูลจาก LocalStorage (ทำเป็นฟังก์ชันแยกเพื่อเรียกใช้ซ้ำได้)
+function loadDataFromStorage() {
+    transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
+    sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
+}
+
+// เริ่มต้นระบบ
+loadDataFromStorage();
 updateUI();
 
+// 🚩 ฟังก์ชันสลับ Tab แบบ Anti-Cache
 function switchTab(tabName) {
+    // 1. สลับ Class Active ของปุ่มและหน้าจอ
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('onclick').includes(tabName));
     });
     document.getElementById(`tab-${tabName}`).classList.add('active');
 
+    // 2. จัดการ Footer (ซ่อน/แสดง)
     const footer = document.querySelector('.footer-summary');
     if (footer) {
         footer.style.display = (tabName === 'record') ? 'block' : 'none';
     }
 
-    if (tabName === 'summary') renderSummary();
-    if (tabName === 'log') renderLog();
+    // 3. ⚡️ ล้างแคช/รีเซ็ตค่า UI เมื่อสลับ Tab
+    loadDataFromStorage(); // โหลดข้อมูลใหม่จากเครื่องทุกครั้งที่สลับหน้า
+    
+    if (tabName === 'record') {
+        // ถ้ากลับมาหน้าบันทึก ให้ล้างยอดเงินคืนที่ค้างไว้
+        const returnInput = document.getElementById('returnAmount');
+        if (returnInput) returnInput.value = '';
+        updateUI();
+    }
+    
+    if (tabName === 'summary') {
+        renderSummary();
+    }
+    
+    if (tabName === 'log') {
+        // รีเซ็ตตัวกรองวันที่ให้เป็นค่าว่าง (ล้างแคชตัวกรอง)
+        const dateFilter = document.getElementById('logDateFilter');
+        if (dateFilter) dateFilter.value = ''; 
+        renderLog();
+    }
 }
 
 function setMode(mode) {
@@ -100,12 +129,14 @@ function renderSummary() {
     `).join('');
 }
 
-// 🚩 เพิ่มฟังก์ชัน "ไม่พบรายการ" เมื่อค้นหาแล้วไม่เจอ
 function renderLog() {
     const container = document.getElementById('logList');
     const filterValue = document.getElementById('logDateFilter').value;
     
-    if (sessions.length === 0) return container.innerHTML = '';
+    if (sessions.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
 
     let filteredSessions = sessions;
     if (filterValue) {
@@ -115,7 +146,6 @@ function renderLog() {
         });
     }
 
-    // จุดแก้ไข: แสดงข้อความเมื่อ Filter แล้วไม่เจอข้อมูล
     if (filterValue && filteredSessions.length === 0) {
         container.innerHTML = '<p class="empty-msg">❌ ไม่พบข้อมูลในวันที่เลือก</p>';
         return;
