@@ -93,3 +93,39 @@ body {
 
 .footer-summary { background: #f0fdf4; padding: 20px; text-align: center; border-top: 1px solid #dcfce7; }
 .footer-summary h2 { margin: 5px 0 0; color: #166534; font-size: 2.2rem; }
+
+/* ส่วนกรองวันที่ */
+.filter-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.btn-clear-filter {
+    padding: 10px 15px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 10px;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.empty-msg {
+    text-align: center;
+    color: #94a3af;
+    padding: 40px 0;
+}
+
+/* ปรับปรุง Footer ให้ซ่อนได้เนียนๆ */
+.footer-summary {
+    transition: 0.3s;
+}
