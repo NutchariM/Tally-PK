@@ -1,91 +1,84 @@
-/* 🎨 Tally-PK: Final Modern & Clean UI */
+/* 🎨 Tally-PK: Global Styles & Variables */
 :root {
-    --primary: #6C5CE7;        /* สีม่วงที่คุณชอบ */
-    --primary-soft: #F2F1FF;
-    --withdraw: #ff4757;       /* สีแดงเบิก */
-    --return: #2ed573;         /* สีเขียวคืน */
-    --bg-app: #F8F9FD;        /* สีพื้นหลังแอป (เทาจางๆ) */
-    --text-main: #2D3436;
-    --text-sub: #A4B0BE;
-    --border: #EDF2F7;
-    --radius: 20px;            /* ความโค้งมนที่ดูพอดี */
-    --shadow: 0 10px 25px rgba(0,0,0,0.03);
+    --primary: #6366f1;
+    --withdraw: #ef4444; /* สีแดงสำหรับเบิก (-) */
+    --return: #10b981;   /* สีเขียวสำหรับคืน (+) */
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --border: #e2e8f0;
 }
 
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
 }
 
 body {
-    font-family: 'Sarabun', -apple-system, sans-serif;
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a; /* พื้นหลัง Desktop */
-    display: flex;
-    justify-content: center;
+    line-height: 1.5;
 }
 
-/* 📱 Container: จำลองหน้าจอมือถือ */
 .app-container {
-    width: 100%;
-    max-width: 450px;
-    height: 100dvh; /* ป้องกันแถบ Safari บังด้านล่าง */
-    background: var(--bg-app);
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 0 50px rgba(0,0,0,0.3);
 }
 
 /* 📍 Header & Tabs */
 .main-header {
-    background: var(--primary);
-    padding: 25px 20px 15px;
-    color: white;
+    background: white;
+    padding: 20px 15px 10px;
     text-align: center;
-    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
 }
 
 .main-header h1 {
     font-size: 1.4rem;
     margin: 0 0 15px;
-    font-weight: 800;
 }
 
 .tab-nav {
     display: flex;
-    background: rgba(0, 0, 0, 0.15);
+    background: #f1f5f9;
     padding: 4px;
-    border-radius: 100px;
+    border-radius: 12px;
+    gap: 4px;
 }
 
 .tab-item {
     flex: 1;
     border: none;
     padding: 10px;
-    border-radius: 100px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    color: var(--text-sub);
     background: transparent;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 .tab-item.active {
     background: white;
     color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* 📝 Content Area */
 .content-area {
-    padding: 24px 20px;
+    padding: 20px 15px 120px;
     flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 .tab-content {
@@ -94,137 +87,190 @@ body {
 
 .tab-content.active {
     display: block;
-    animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ⌨️ Form Elements: Modern & Minimal */
-.form-group {
-    margin-bottom: 25px;
-}
-
+/* ⌨️ Inputs & Controls */
 .label {
     display: block;
-    font-weight: 700;
+    font-weight: bold;
     margin-bottom: 8px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-sub);
-    text-transform: uppercase;
 }
 
 .main-input {
     width: 100%;
-    padding: 16px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    background: white;
-    font-size: 1.1rem;
-    color: var(--text-main);
+    padding: 12px 15px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    margin-bottom: 20px;
     outline: none;
     transition: 0.2s;
-    font-family: inherit;
-    box-shadow: var(--shadow);
-    /* 🚩 ลบสไตล์เดิมของ Safari */
-    -webkit-appearance: none;
-    appearance: none;
 }
 
 .main-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-soft);
 }
 
-/* 🔘 Buttons & Toggles */
 .action-toggle {
     display: flex;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
     background: white;
-    font-weight: 700;
-    color: var(--text-sub);
+    font-weight: bold;
     cursor: pointer;
-    box-shadow: var(--shadow);
 }
 
-.toggle-btn.active#modeWithdraw { background: var(--withdraw); color: white; border-color: var(--withdraw); }
-.toggle-btn.active#modeReturn { background: var(--return); color: white; border-color: var(--return); }
-
-.quick-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+.toggle-btn.active {
+    border-color: var(--primary);
+    background: #eef2ff;
+    color: var(--primary);
 }
 
-.btn-amt {
-    padding: 20px;
+/* 🔘 Buttons */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
     border: none;
-    border-radius: var(--radius);
-    background: var(--primary);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
     color: white;
-    font-weight: 800;
-    font-size: 1.2rem;
-    box-shadow: 0 8px 15px rgba(108, 92, 231, 0.2);
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.btn-amt:active { transform: scale(0.95); }
+.btn-withdraw { background-color: var(--withdraw); }
+.btn-return { background-color: var(--return); }
+.btn-submit:active { transform: scale(0.98); }
 
-/* 📊 Data Cards */
-.person-card, .table-card {
+/* 📊 Summary Cards (Tab 2) - แบ่งเป็นคอลัมน์ */
+.person-card {
     background: white;
-    padding: 20px;
-    border-radius: var(--radius);
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
-    border: 1px solid white;
+    padding: 18px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-/* 📜 History Table */
+.person-card strong {
+    font-size: 1.1rem;
+}
+
+/* ยอดสุทธิใน Card */
+.net-amount {
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+/* ส่วนแบ่งคอลัมน์ รวมเบิก / รวมคืน */
+.summary-columns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+}
+
+.col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.col span {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+}
+
+.col strong {
+    font-size: 1rem;
+}
+
+/* 📜 History Table (Tab 1) */
 .history-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.history-table th {
+    text-align: left;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    border-bottom: 1px solid var(--border);
 }
 
 .history-table td {
-    padding: 15px 10px;
-    border-bottom: 1px solid #F8F9FD;
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.history-table tr:last-child td { border-bottom: none; }
+.t-red { color: var(--withdraw); font-weight: bold; }
+.t-green { color: var(--return); font-weight: bold; }
 
-.t-red { color: var(--withdraw); font-weight: 800; }
-.t-green { color: var(--return); font-weight: 800; }
-
-/* 💰 Footer Summary */
+/* 💰 Footer Total */
 .footer-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 500px;
+    margin: 0 auto;
     background: white;
-    padding: 20px 25px;
-    border-radius: 24px 24px 0 0;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 -10px 25px rgba(0,0,0,0.03);
-    flex-shrink: 0;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
-.footer-summary p { margin: 0; font-size: 0.9rem; color: var(--text-sub); font-weight: 700; }
-.footer-summary h2 { margin: 0; font-size: 1.8rem; font-weight: 900; }
+.footer-summary p { margin: 0; color: var(--text-sub); font-size: 0.9rem; }
+.footer-summary h2 { margin: 0; font-size: 1.5rem; }
 
-/* Utility */
+/* 🔚 End Round Button */
 .btn-end-round {
-    width: 100%; padding: 16px; background: #1e293b; color: white; border: none;
-    border-radius: var(--radius); font-weight: 700; margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
 }
 
-.flex-input-group { display: flex; gap: 10px; }
-.btn-save-return { background: var(--return); color: white; border: none; border-radius: var(--radius); padding: 0 20px; font-weight: 700; }
+/* 📜 Log Page (Tab 3) */
+.log-card {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.log-date { font-size: 0.8rem; color: var(--text-sub); }
+.log-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.empty-msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-sub);
+}
