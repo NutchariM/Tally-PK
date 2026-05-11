@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกการเงิน</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav-back">
+            <a href="index.html">← กลับหน้าหลัก</a>
+        </div>
+        
+        <div class="header">
+            <h1>💰 บันทึกการเงิน</h1>
+            <div class="balance">
+                <div class="balance-amount">200 บาท = 1 ชีต</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">👤 เลือกผู้เบิก/คืน</div>
+                <div class="person-buttons">
+                    <button class="person-btn" onclick="selectPerson('มด')">มด</button>
+                    <button class="person-btn" onclick="selectPerson('Rex')">Rex</button>
+                    <button class="person-btn" onclick="selectPerson('บิ๊ว')">บิ๊ว</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">✏️ ผู้บันทึก</div>
+                <div class="person-buttons" id="recorderButtons">
+                    <button class="person-btn" onclick="selectRecorder('มด')">มด</button>
+                    <button class="person-btn" onclick="selectRecorder('Rex')">Rex</button>
+                    <button class="person-btn" onclick="selectRecorder('บิ๊ว')">บิ๊ว</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="tabs">
+                    <button class="tab active" onclick="selectType('เบิก')">เบิกเงิน</button>
+                    <button class="tab" onclick="selectType('คืน')">คืนเงิน</button>
+                </div>
+
+                <input type="text" id="noteInput" placeholder="จำนวนเงินที่เบิก" />
+                
+                <div class="amount-shortcuts">
+                    <button class="shortcut-btn" onclick="addAmount(200)">+200</button>
+                    <button class="shortcut-btn" onclick="addAmount(500)">+500</button>
+                    <button class="shortcut-btn" onclick="addAmount(1000)">+1,000</button>
+                    <button class="shortcut-btn" onclick="addAmount(2000)">+2,000</button>
+                </div>
+
+                <button class="submit-btn" onclick="submitTransaction()">บันทึก</button>
+            </div>
+
+            <div class="summary">
+                <div class="summary-title">ยอดรวมวันนี้</div>
+                <div class="summary-amount" id="totalAmount">0 ฿</div>
+                <div class="summary-count" id="transactionCount">0 ชีต</div>
+            </div>
+
+            <div class="history">
+                <div class="history-title">📋 ประวัติการเบิก</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>ผู้เบิก/คืน</th>
+                            <th>ผู้คีย์</th>
+                            <th>ประเภท</th>
+                            <th>จำนวน</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="5" class="empty-state">ยังไม่มีรายการ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/money.js"></script>
+</body>
+</html>
