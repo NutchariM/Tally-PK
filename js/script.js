@@ -1,141 +1,182 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCr9fXfx9m9cQ9_N_VhE3VTLbgdk3ZXRKM",
+  authDomain: "tally-pk.firebaseapp.com",
+  databaseURL: "https://tally-pk-default-rtdb.asia-southeast1.firebasedatabase.app/", 
+  projectId: "tally-pk",
+  storageBucket: "tally-pk.firebasestorage.app",
+  messagingSenderId: "849778226457",
+  appId: "1:849778226457:web:6ec1724e76588358f3c188"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 let currentMode = 'withdraw';
-let transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
-let sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
+let transactions = [];
+let sessions = [];
 
-updateUI();
+// --- Listener ข้อมูลจาก Cloud ---
+onValue(ref(db, 'transactions'), (snapshot) => {
+    const data = snapshot.val();
+    transactions = data ? Object.values(data) : [];
+    updateUI();
+    renderSummary();
+});
 
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(tabName));
-    });
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    if (tabName === 'summary') renderSummary();
-    if (tabName === 'log') renderLog();
-}
+onValue(ref(db, 'sessions'), (snapshot) => {
+    const data = snapshot.val();
+    sessions = data ? Object.values(data).reverse() : [];
+    window.renderLog(); // 🚩 เรียกผ่าน window เพื่อความชัวร์
+});
 
-function setMode(mode) {
+// --- ฟังก์ชันหลัก (ส่งออกไปที่ window ทั้งหมดเพื่อแก้ปัญหา ReferenceError) ---
+
+window.setMode = (mode) => {
     currentMode = mode;
     const isW = mode === 'withdraw';
     document.getElementById('modeWithdraw').classList.toggle('active', isW);
     document.getElementById('modeReturn').classList.toggle('active', !isW);
     document.getElementById('withdraw-section').style.display = isW ? 'block' : 'none';
     document.getElementById('return-section').style.display = isW ? 'none' : 'block';
-}
+};
 
-function handleReturn() {
-    const amt = parseInt(document.getElementById('returnAmount').value);
-    if (!amt) return alert("กรุณาระบุยอดเงิน");
-    saveEntry(amt);
-    document.getElementById('returnAmount').value = '';
-}
-
-function saveEntry(amount) {
-    const name = document.getElementById('userName').value.trim();
-    if (!name) return alert("กรุณากรอกชื่อ");
+window.saveEntry = (amount) => {
+    const nameInput = document.getElementById('userName');
+    const name = nameInput.value.trim();
+    if (!name) return alert("กรุณาใส่ชื่อก่อนบันทึกครับ"), nameInput.focus();
 
     const newTx = {
+        id: Date.now(),
         time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
         name: name,
         type: currentMode,
         amount: amount
     };
 
-    transactions.push(newTx);
-    saveData();
-    updateUI();
-}
+    push(ref(db, 'transactions'), newTx);
+    nameInput.value = '';
+    nameInput.focus();
+};
 
-// อัปเดต UI แบบไม่มีปุ่มลบ
+window.handleReturn = () => {
+    const input = document.getElementById('returnAmount');
+    const amt = parseInt(input.value);
+    if (!amt) return alert("ระบุยอดเงินด้วยครับ");
+    window.saveEntry(amt);
+    input.value = '';
+};
+
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
-    body.innerHTML = '';
-    
-    [...transactions].reverse().forEach(t => {
-        const isW = t.type === 'withdraw';
-        const khitValue = t.amount / 200;
-        
-        body.insertAdjacentHTML('beforeend', `
-            <tr>
-                <td>${t.time}</td>
-                <td><strong>${t.name}</strong></td>
-                <td class="${isW ? 't-red' : 't-green'}">${isW ? '+' : '-'}${t.amount.toLocaleString()}</td>
-                <td class="khit-col">${khitValue} ขีด</td>
-            </tr>
-        `);
-    });
-
+    body.innerHTML = transactions.slice().reverse().map(t => `
+        <tr>
+            <td>${t.time}</td>
+            <td><strong>${t.name}</strong></td>
+            <td class="${t.type === 'withdraw' ? 't-red' : 't-green'}">${t.type === 'withdraw' ? '+' : '-'}${t.amount.toLocaleString()}</td>
+            <td class="khit-col">${t.amount / 200} ขีด</td>
+        </tr>
+    `).join('');
     const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
     document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
-function saveData() {
-    localStorage.setItem('myTransactions', JSON.stringify(transactions));
-    localStorage.setItem('mySessions', JSON.stringify(sessions));
-}
-
 function renderSummary() {
     const container = document.getElementById('summaryList');
+    if (!container) return;
     const summary = {};
     transactions.forEach(t => {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
     const keys = Object.keys(summary);
-    if (keys.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af;">ไม่มีข้อมูล</p>';
-    container.innerHTML = keys.map(name => `
-        <div class="person-card">
-            <span>${name}</span>
-            <strong>${summary[name].toLocaleString()} ฿</strong>
-        </div>
-    `).join('');
+    container.innerHTML = keys.length ? keys.map(n => `<div class="person-card"><span>${n}</span><strong>${summary[n].toLocaleString()} ฿</strong></div>`).join('') : '<p class="empty-msg">ยังไม่มีข้อมูลในรอบนี้</p>';
 }
 
-function endRound() {
-    if (transactions.length === 0) return alert("ไม่มีรายการให้จบยอด");
-    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่ใช่หรือไม่? (ข้อมูลจะถูกบันทึกลงประวัติรอบ)")) return;
-    
+window.endRound = () => {
+    if (!transactions.length) return alert("ยังไม่มีรายการ");
+    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่?")) return;
     const summary = {};
     transactions.forEach(t => {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
+    const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
+    push(ref(db, 'sessions'), { id: Date.now(), date: new Date().toLocaleString('th-TH'), total, details: summary });
+    remove(ref(db, 'transactions'));
+    location.hash = 'log';
+};
 
-    const session = { 
-        date: new Date().toLocaleString('th-TH'), 
-        total: transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0), 
-        details: summary 
-    };
-
-    sessions.unshift(session);
-    transactions = [];
-    saveData();
-    updateUI();
-    switchTab('log');
-}
-
-function renderLog() {
+// 🚩 ฟังก์ชันเจ้าปัญหาที่ต้องส่งออกไปที่ window และเพิ่ม Logic "ไม่พบรายการ"
+window.renderLog = () => {
     const container = document.getElementById('logList');
-    if (sessions.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af;">ยังไม่มีประวัติ</p>';
-    container.innerHTML = sessions.map(s => `
+    const filterValue = document.getElementById('logDateFilter').value;
+    if (!container) return;
+
+    if (sessions.length === 0) {
+        container.innerHTML = '<p class="empty-msg">ไม่มีประวัติการจบยอด</p>';
+        return;
+    }
+
+    let filtered = sessions;
+    if (filterValue) {
+        filtered = sessions.filter(s => {
+            // แปลง id (timestamp) เป็นวันที่ YYYY-MM-DD เพื่อเทียบกับ input date
+            const sessionDate = new Date(s.id).toISOString().split('T')[0];
+            return sessionDate === filterValue;
+        });
+    }
+
+    // ✅ เพิ่มตรงนี้: ถ้าเลือกวันที่แล้วไม่มีข้อมูล ให้แสดงข้อความแจ้งเตือน
+    if (filterValue && filtered.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px; color: #94a3af;">
+                <i class="fa-regular fa-calendar-xmark" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                <p>ไม่พบรายการของวันที่คุณเลือกครับ</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = filtered.map(s => `
         <div class="log-card">
-            <div class="log-date">🕒 ${s.date}</div>
+            <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
             <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿</div>
             <div class="log-details">
-                ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name]}</span>`).join('')}
+                ${Object.keys(s.details).map(n => `<span>${n}: ${s.details[n].toLocaleString()}</span>`).join('')}
             </div>
         </div>
     `).join('');
+};
+
+window.clearFilter = () => {
+    document.getElementById('logDateFilter').value = '';
+    window.renderLog();
+};
+
+window.nuclearReset = () => {
+    if (confirm("⚠️ ล้างข้อมูลทั้งหมดถาวร?")) {
+        remove(ref(db, '/'));
+        location.reload();
+    }
+};
+
+function handleRouting() {
+    const hash = window.location.hash.replace('#', '') || 'record';
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+    const targetTab = document.getElementById(`tab-${hash}`);
+    const targetBtn = document.getElementById(`btn-${hash}`);
+    if (targetTab && targetBtn) {
+        targetTab.classList.add('active');
+        targetBtn.classList.add('active');
+    }
+    const footer = document.querySelector('.footer-summary');
+    if (footer) footer.style.display = (hash === 'record') ? 'block' : 'none';
 }
 
-function copySummary() {
-    let text = "📊 สรุปยอดเบิก-คืน\n";
-    const summary = {};
-    transactions.forEach(t => {
-        if (!summary[t.name]) summary[t.name] = 0;
-        summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
-    });
-    Object.keys(summary).forEach(n => text += `- ${n}: ${summary[n]} ฿\n`);
-    navigator.clipboard.writeText(text).then(() => alert("ก๊อปปี้แล้ว!"));
-}
+window.addEventListener('hashchange', handleRouting);
+window.addEventListener('load', handleRouting);
