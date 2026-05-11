@@ -3,73 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บันทึกการเงิน</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>บันทึกการเบิกเงิน</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💰 บันทึกการเงิน</h1>
-            <div class="balance">
-                <div class="balance-amount">200 บาท = 1 ชีต</div>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="header-left">
+                <h1>💰 บันทึกการเบิกเงิน</h1>
+                <span>200 บาท = 1 ขีด</span>
             </div>
-        </div>
-
-        <div class="content">
-            <!-- กรอกชื่อผู้เบิก/คืน -->
-            <div class="section">
-                <div class="section-title">👤 ชื่อผู้เบิก/คืน</div>
-                <input type="text" id="personInput" placeholder="กรอกชื่อผู้เบิก/คืน" />
+            <div class="header-actions">
+                <button class="btn-log">📊 Log (0)</button>
+                <button class="btn-reset" onclick="resetAll()">🔄 รีเซ็ต</button>
             </div>
+        </header>
 
-            <!-- เบิกเงิน/คืนเงิน -->
-            <div class="section">
-                <div class="tabs">
-                    <button class="tab active" onclick="selectType('เบิก')">เบิกเงิน</button>
-                    <button class="tab" onclick="selectType('คืน')">คืนเงิน</button>
+        <main class="content">
+            <section class="section">
+                <label class="section-label">👤 เลือกผู้เบิก/คืน</label>
+                <div class="chip-group" id="userSelector">
+                    <button class="chip active" onclick="selectUser('มด', this)">มด</button>
+                    <button class="chip" onclick="selectUser('Rex', this)">Rex</button>
+                    <button class="chip" onclick="selectUser('นิว', this)">นิว</button>
+                    <button class="chip btn-add-user">+</button>
                 </div>
+            </section>
 
-                <input type="text" id="amountInput" placeholder="จำนวนเงินที่เบิก" readonly />
-                
-                <div class="amount-shortcuts">
-                    <button class="shortcut-btn" onclick="addAmount(200)">+200</button>
-                    <button class="shortcut-btn" onclick="addAmount(500)">+500</button>
-                    <button class="shortcut-btn" onclick="addAmount(1000)">+1,000</button>
-                    <button class="shortcut-btn" onclick="addAmount(2000)">+2,000</button>
+            <div class="action-toggle">
+                <button id="typeWithdraw" class="toggle-item active" onclick="changeType('withdraw')">เบิกเงิน</button>
+                <button id="typeReturn" class="toggle-item" onclick="changeType('return')">คืนเงิน</button>
+            </div>
+
+            <div class="input-row">
+                <input type="number" id="amountInput" placeholder="จำนวนเงินที่เบิก" inputmode="numeric">
+                <button class="btn-save" onclick="handleSave()">บันทึก</button>
+            </div>
+
+            <div class="quick-nums">
+                <button onclick="addValue(200)">+200</button>
+                <button onclick="addValue(500)">+500</button>
+                <button onclick="addValue(1000)">+1,000</button>
+                <button onclick="addValue(2000)">+2,000</button>
+            </div>
+
+            <section class="summary-individual">
+                <label class="section-label">📊 สรุปยอดแต่ละคน</label>
+                <div class="summary-chips">
+                    <span class="summary-chip">มด</span>
+                    <span class="summary-chip">Rex</span>
+                    <span class="summary-chip">นิว</span>
                 </div>
+            </section>
 
-                <button class="submit-btn" onclick="submitTransaction()">บันทึก</button>
+            <div class="total-display">
+                <p>ยอดรวมวันนี้</p>
+                <h2 id="totalText">0 ฿</h2>
+                <span id="unitText">0 ขีด</span>
             </div>
 
-            <!-- สรุปยอดคงเหลือ -->
-            <div class="summary">
-                <div class="summary-title">ยอดรวมวันนี้</div>
-                <div class="summary-amount" id="totalAmount">0 ฿</div>
-                <div class="summary-count" id="transactionCount">0 ชีต</div>
-            </div>
-
-            <!-- ประวัติการเบิก -->
-            <div class="history">
-                <div class="history-title">📋 ประวัติการเบิก</div>
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>เวลา</th>
-                            <th>ผู้เบิก/คืน</th>
-                            <th>ประเภท</th>
-                            <th>จำนวน</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyBody">
-                        <tr>
-                            <td colspan="4" class="empty-state">ยังไม่มีรายการ</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <section class="history-section">
+                <h3 class="section-label">📋 ประวัติการเบิก</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เวลา</th>
+                                <th>ผู้เบิก/คืน</th>
+                                <th>ประเภท</th>
+                                <th>จำนวน</th>
+                                <th>ขีด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer-note">
+            5 ขีด = 1,000 บาท • กด 🔄 รีเซ็ตเพื่อจบเกมส์และเริ่มใหม่
+        </footer>
     </div>
-
-    <script src="js/money.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
