@@ -281,3 +281,44 @@ body {
     font-weight: bold;
     margin-top: 30px;
 }
+/* 📅 Modern Date Input (Bootstrap Style) */
+.filter-input-modern {
+    border: 2px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--text-main);
+    background-color: #ffffff;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    width: 100%;
+    /* ปรับแต่งไอคอนปฏิทินของเบราว์เซอร์ให้ดูเบาลง */
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.filter-input-modern:focus {
+    border-color: var(--primary-start) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 🚩 ลบสไตล์เดิมๆ ของลูกศรและปุ่มล้างใน Chrome/Safari */
+::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(215deg) brightness(95%) contrast(80%);
+    /* ทำให้ไอคอนปฏิทินเป็นสีม่วงเข้ากับแอป */
+}
+
+/* ปรับปรุง Filter Area ให้ดูเหมือน Bootstrap Card */
+.filter-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 10px 15px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
