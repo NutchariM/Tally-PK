@@ -1,6 +1,12 @@
 let selectedUser = 'มด';
 let currentMode = 'withdraw';
-let totalAmount = 0;
+
+// เก็บยอดรวมเงินของแต่ละคน
+const balances = {
+    'มด': 0,
+    'Rex': 0,
+    'นิว': 0
+};
 
 function selectUser(user, element) {
     selectedUser = user;
@@ -37,37 +43,40 @@ function handleReturnSave() {
         return;
     }
     saveData(val);
-    input.value = ''; // ล้างค่า
+    input.value = '';
 }
 
 function saveData(amount) {
     const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     const isWithdraw = currentMode === 'withdraw';
     
-    // อัปเดตยอดรวม
+    // 1. อัปเดตยอดเงินใน Object ของแต่ละคน
     if (isWithdraw) {
-        totalAmount += amount;
+        balances[selectedUser] += amount;
     } else {
-        totalAmount -= amount;
+        balances[selectedUser] -= amount;
     }
 
-    // เพิ่มลงตารางประวัติ
+    // 2. อัปเดต UI รายคน (Individual Card)
+    const userKhits = balances[selectedUser] / 200;
+    document.getElementById(`val-${selectedUser}`).innerText = userKhits;
+    document.getElementById(`baht-${selectedUser}`).innerText = `${balances[selectedUser].toLocaleString()} ฿`;
+
+    // 3. คำนวณยอดรวมทั้งกอง
+    let totalBaht = Object.values(balances).reduce((a, b) => a + b, 0);
+    document.getElementById('totalUnit').innerText = `${totalBaht / 200} ขีด`;
+    document.getElementById('totalBaht').innerText = `${totalBaht.toLocaleString()} ฿`;
+
+    // 4. เพิ่มลงตารางประวัติ
     const historyBody = document.getElementById('historyBody');
+    const unitChange = amount / 200;
     const row = `
         <tr>
             <td>${time}</td>
             <td><strong>${selectedUser}</strong></td>
             <td class="${isWithdraw ? 'badge-w' : 'badge-r'}">${isWithdraw ? '↗ เบิก' : '↩ คืน'}</td>
-            <td class="${isWithdraw ? 'badge-w' : 'badge-r'}">${isWithdraw ? '+' : '-'}${amount.toLocaleString()}</td>
+            <td class="${isWithdraw ? 'badge-w' : 'badge-r'}">${isWithdraw ? '+' : '-'}${unitChange} ขีด</td>
         </tr>
     `;
     historyBody.insertAdjacentHTML('afterbegin', row);
-
-    // อัปเดตหน้าจอ
-    document.getElementById('totalText').innerText = `${totalAmount.toLocaleString()} ฿`;
-    document.getElementById('unitText').innerText = `${totalAmount / 200} ขีด`;
-}
-
-function resetAll() {
-    if(confirm("ล้างข้อมูลทั้งหมด?")) location.reload();
 }
