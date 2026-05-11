@@ -1,15 +1,15 @@
-/* 🎨 Tally-PK: Global Design System */
+/* 🎨 Tally-PK: App-Like Design System */
 :root {
     --primary: #6366f1;
-    --withdraw: #ef4444; /* แดงสำหรับเบิก (-) */
-    --return: #10b981;   /* เขียวสำหรับคืน (+) */
-    --bg: #f8fafc;
-    --card-bg: #ffffff;
+    --primary-light: #eef2ff;
+    --withdraw: #ef4444; /* สีแดงสำหรับเบิก (-) */
+    --return: #10b981;   /* สีเขียวสำหรับคืน (+) */
+    --bg: #f1f5f9;       /* สีพื้นหลังแอป (เทาอ่อนนุ่มๆ) */
+    --card: #ffffff;
     --text-main: #1e293b;
     --text-sub: #64748b;
     --border: #e2e8f0;
-    --radius: 16px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -19,83 +19,86 @@
 
 body {
     font-family: 'Sarabun', sans-serif;
-    background-color: var(--bg);
+    background-color: var(--bg); /* พื้นหลังสีเทาอ่อนเพื่อให้ Card สีขาวเด่นขึ้น */
     color: var(--text-main);
     margin: 0;
     padding: 0;
+    display: flex;
+    justify-content: center;
 }
 
+/* 📱 Container คุมความกว้างให้เหมือน App */
 .app-container {
-    max-width: 500px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 480px; /* ขนาดที่สวยที่สุดบนมือถือและจอคอม */
     min-height: 100vh;
+    background: white; /* พื้นหลังข้างในเป็นสีขาว */
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 40px rgba(0,0,0,0.1); /* เงาด้านข้างเวลาดูบนคอม */
 }
 
-/* 📍 Header & Modern Tab Nav */
+/* 📍 Header & Tabs */
 .main-header {
     background: white;
-    padding: 20px 15px 15px;
+    padding: 24px 20px 10px;
     position: sticky;
     top: 0;
     z-index: 100;
     border-bottom: 1px solid var(--border);
-    text-align: center;
 }
 
 .main-header h1 {
-    font-size: 1.4rem;
-    margin: 0 0 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    font-size: 1.5rem;
+    margin: 0 0 20px;
+    text-align: center;
 }
 
 .tab-nav {
     display: flex;
     background: #f1f5f9;
     padding: 4px;
-    border-radius: 12px;
+    border-radius: 14px;
     gap: 4px;
 }
 
 .tab-item {
     flex: 1;
     border: none;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: bold;
     color: var(--text-sub);
     background: transparent;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: 0.3s;
 }
 
 .tab-item.active {
     background: white;
     color: var(--primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow);
 }
 
 /* 📝 Content Area */
 .content-area {
-    padding: 20px 15px 120px;
+    padding: 20px;
+    flex: 1;
+    background-color: #fcfcfc; /* สีพื้นหลังส่วนเนื้อหาที่ต่างจาก Header เล็กน้อย */
 }
 
 .tab-content {
     display: none;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .tab-content.active {
     display: block;
-    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -103,18 +106,18 @@ body {
 .label {
     display: block;
     font-weight: bold;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    color: var(--text-sub);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: var(--text-main);
 }
 
 .main-input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 16px;
     border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 1rem;
-    margin-bottom: 20px;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    margin-bottom: 24px;
     outline: none;
     transition: 0.2s;
     font-family: inherit;
@@ -122,20 +125,19 @@ body {
 
 .main-input:focus {
     border-color: var(--primary);
-    background: white;
 }
 
 .action-toggle {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 12px;
+    padding: 14px;
     border: 2px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     background: white;
     font-weight: bold;
     cursor: pointer;
@@ -144,33 +146,32 @@ body {
 
 .toggle-btn.active {
     border-color: var(--primary);
-    background: #eef2ff;
+    background: var(--primary-light);
     color: var(--primary);
 }
 
 /* 🔘 Submit Buttons */
 .btn-submit {
     width: 100%;
-    padding: 16px;
+    padding: 18px;
     border: none;
-    border-radius: 14px;
-    font-size: 1.1rem;
+    border-radius: 18px;
+    font-size: 1.15rem;
     font-weight: bold;
     color: white;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .btn-withdraw { background: var(--withdraw); }
 .btn-return { background: var(--return); }
-.btn-submit:active { transform: scale(0.97); }
 
-/* 📊 Summary Cards (Tab 2) */
-.person-card {
+/* 📊 Summary Cards (Tab 2 & 3) */
+.person-card, .log-card {
     background: white;
     padding: 20px;
-    border-radius: var(--radius);
-    margin-bottom: 15px;
+    border-radius: 20px;
+    margin-bottom: 16px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
@@ -183,25 +184,7 @@ body {
     border-top: 1px dashed var(--border);
 }
 
-.col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.col span {
-    font-size: 0.75rem;
-    color: var(--text-sub);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.net-amount {
-    font-size: 1.3rem;
-    font-weight: 800;
-}
-
-/* 📜 History Table (Tab 1) */
+/* 📜 History Table */
 .history-table {
     width: 100%;
     border-collapse: collapse;
@@ -209,132 +192,54 @@ body {
 
 .history-table th {
     text-align: left;
-    padding: 10px;
-    font-size: 0.8rem;
+    padding: 12px 10px;
+    font-size: 0.85rem;
     color: var(--text-sub);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .history-table td {
-    padding: 14px 10px;
-    border-bottom: 1px solid #f1f5f9;
+    padding: 16px 10px;
+    border-bottom: 1px solid #f8fafc;
 }
 
 .t-red { color: var(--withdraw); font-weight: bold; }
 .t-green { color: var(--return); font-weight: bold; }
 
-/* 📅 Filter Area (Tab 3) - ปรับปรุงใหม่ */
-.filter-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    background: white;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.filter-input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 1rem;
-    outline: none;
-}
-
-.btn-clear-filter {
-    background: #f1f5f9;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    color: var(--text-sub);
-    cursor: pointer;
-}
-
-/* 📜 Log Cards (Tab 3) - ปรับปรุงใหม่ */
-.log-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--radius);
-    margin-bottom: 15px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.log-date {
-    font-size: 0.8rem;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.log-details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed var(--border);
-}
-
-.log-details span {
-    background: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-/* 💰 Footer Area */
+/* 💰 Sticky Footer (ยอดรวมกองกลาง) */
 .footer-summary {
-    position: fixed;
+    position: sticky;
     bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 500px;
-    margin: 0 auto;
     background: white;
     padding: 20px;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
 }
 
 .footer-summary h2 {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     font-weight: 900;
 }
 
-/* 🔚 Nuclear Buttons */
-.btn-end-round {
-    width: 100%;
-    padding: 14px;
-    background: #1e293b;
-    color: white;
+/* 📅 Filter Area (Tab 3) */
+.filter-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 16px;
+}
+
+.filter-input {
+    flex: 1;
     border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    margin-top: 30px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 80px 20px;
-    color: #94a3af;
-}
-
-.empty-state i {
-    font-size: 3.5rem;
-    margin-bottom: 15px;
-    display: block;
-    opacity: 0.2;
+    background: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
 }
