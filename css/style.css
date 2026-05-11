@@ -17,79 +17,49 @@ body {
     width: 100%; max-width: 480px;
     background: white; border-radius: 24px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    display: flex; flex-direction: column; height: 90vh; overflow: hidden;
+    display: flex; flex-direction: column; height: 95vh; overflow: hidden;
 }
 
-/* Header & Tabs */
 .main-header {
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: white; padding: 20px 15px 10px; text-align: center;
+    color: white; padding: 25px 15px 15px; text-align: center;
 }
-.main-header h1 { font-size: 1.3rem; margin: 0; }
 
 .tab-nav {
     display: flex; background: rgba(255,255,255,0.15);
-    margin: 15px 5px 5px; border-radius: 12px; padding: 4px;
+    margin: 20px 5px 5px; border-radius: 12px; padding: 4px;
 }
-.tab-item {
-    flex: 1; border: none; background: transparent; color: white;
-    padding: 10px; border-radius: 8px; cursor: pointer; font-family: 'Sarabun';
-}
-.tab-item.active { background: white; color: var(--primary); font-weight: bold; }
 
-/* Content Area */
-.content-area { flex: 1; padding: 20px; overflow-y: auto; }
+.content-area { flex: 1; padding: 25px; overflow-y: auto; } /* เพิ่ม Padding รอบๆ */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Form Elements */
-.label { font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 8px; display: block; }
-.main-input {
-    width: 100%; padding: 14px; border: 2px solid #e2e8f0;
-    border-radius: 12px; font-size: 1rem; box-sizing: border-box;
-}
+/* เพิ่มระยะห่างระหว่างหัวข้อกับปุ่ม */
+.input-group { margin-bottom: 35px; } /* เพิ่มจาก 20px เป็น 35px */
+.label { font-size: 0.85rem; font-weight: bold; color: #64748b; margin-bottom: 12px; display: block; }
+
 .action-toggle {
-    display: flex; background: #f1f5f9; border-radius: 12px; padding: 5px; margin: 20px 0;
+    display: flex; background: #f1f5f9; border-radius: 12px; padding: 5px; 
+    margin-bottom: 35px; /* เพิ่มระยะห่างล่าง toggle */
 }
-.toggle-btn {
-    flex: 1; border: none; padding: 12px; border-radius: 8px;
-    cursor: pointer; background: transparent; color: #94a3b8; font-weight: bold;
-}
-.toggle-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+.button-section { margin-bottom: 40px; } /* ระยะห่างหลังปุ่มหลัก */
 
 .btn-submit {
-    width: 100%; padding: 18px; border: none; border-radius: 14px;
-    font-size: 1.1rem; font-weight: bold; cursor: pointer; color: white;
-}
-.btn-withdraw { background: var(--primary); }
-.btn-return { background: var(--success); }
-
-/* Table & Summary */
-.history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.history-table th { text-align: left; font-size: 0.75rem; color: #94a3af; padding: 8px; border-bottom: 1px solid #f1f5f9; }
-.history-table td { padding: 12px 8px; border-bottom: 1px solid #f8fafc; font-size: 0.9rem; }
-
-.person-card {
-    display: flex; justify-content: space-between; padding: 15px;
-    background: #f8fafc; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f1f5f9;
-}
-.btn-end-round {
-    width: 100%; padding: 15px; background: var(--dark); color: white;
-    border: none; border-radius: 12px; margin-top: 20px; cursor: pointer;
+    width: 100%; padding: 20px; border: none; border-radius: 16px;
+    font-size: 1.15rem; font-weight: bold; cursor: pointer; color: white;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
 }
 
-/* Log Style */
-.log-card {
-    background: #fff; border: 1px solid #e2e8f0; padding: 15px;
-    border-radius: 12px; margin-bottom: 10px;
-}
-.log-date { font-size: 0.7rem; color: #94a3af; }
-.log-details { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-.log-details span { font-size: 0.75rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+.history-container { margin-top: 45px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
 
-/* Utilities */
+/* Table Style */
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th { text-align: left; font-size: 0.8rem; color: #94a3af; padding: 12px 8px; border-bottom: 1px solid #f1f5f9; }
+.history-table td { padding: 15px 8px; border-bottom: 1px solid #f8fafc; font-size: 0.95rem; }
+
+/* Utility */
+.khit-col { color: var(--primary); font-weight: bold; font-family: 'Inter', sans-serif; }
 .t-red { color: var(--danger); font-weight: bold; }
 .t-green { color: var(--success); font-weight: bold; }
-.btn-del { border: none; background: #fee2e2; color: var(--danger); width: 24px; height: 24px; border-radius: 50%; cursor: pointer; }
-.footer-summary { background: #f0fdf4; padding: 15px; text-align: center; border-top: 1px solid #dcfce7; }
-.footer-summary h2 { margin: 5px 0 0; color: #166534; font-size: 2rem; }
+.footer-summary { background: #f0fdf4; padding: 20px; text-align: center; border-top: 1px solid #dcfce7; }
