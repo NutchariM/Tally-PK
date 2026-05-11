@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Tracker Pro</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Financial Tracker - Multi-Round</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 
@@ -24,7 +25,7 @@
         <div id="tab-record" class="tab-content active">
             <div class="input-group">
                 <label class="label">👤 ชื่อผู้เบิก/คืน</label>
-                <input type="text" id="userName" class="main-input" placeholder="พิมพ์ชื่อเพื่อเริ่มบันทึก...">
+                <input type="text" id="userName" class="main-input" placeholder="พิมพ์ชื่อ...">
             </div>
 
             <div class="action-toggle">
@@ -33,48 +34,43 @@
             </div>
 
             <div id="withdraw-section" class="button-section">
-                <button class="btn-submit btn-withdraw" onclick="saveEntry(200)">
-                    บันทึกเบิกเงิน <strong>200 ฿</strong>
-                </button>
+                <button class="btn-submit btn-withdraw" onclick="saveEntry(200)">บันทึกเบิก 200 ฿</button>
             </div>
 
             <div id="return-section" class="button-section" style="display: none;">
-                <label class="label">💵 ระบุยอดเงินที่คืน</label>
-                <input type="number" id="returnAmount" class="main-input" placeholder="0" inputmode="numeric">
-                <button class="btn-submit btn-return" onclick="handleReturn()" style="margin-top:15px;">บันทึกคืนเงิน</button>
+                <input type="number" id="returnAmount" class="main-input" placeholder="ระบุยอดคืน" inputmode="numeric">
+                <button class="btn-submit btn-return" onclick="handleReturn()" style="margin-top:10px;">บันทึกคืนเงิน</button>
             </div>
 
             <div class="history-container">
-                <label class="label">🕒 ประวัติในรอบนี้ (แก้ไขไม่ได้)</label>
-                <div class="table-wrapper">
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th>เวลา</th>
-                                <th>ชื่อ</th>
-                                <th>ยอด (฿)</th>
-                                <th>ขีด (|)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyBody"></tbody>
-                    </table>
-                </div>
+                <label class="label">🕒 รายการรอบปัจจุบัน</label>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>ชื่อ</th>
+                            <th>ยอด (฿)</th>
+                            <th>ขีด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
             </div>
         </div>
 
         <div id="tab-summary" class="tab-content">
-            <label class="label">📊 ยอดคงเหลือรายบุคคล</label>
+            <label class="label">📊 ยอดคงเหลือรายบุคคล (รอบนี้)</label>
             <div id="summaryList" class="summary-grid"></div>
             <button class="btn-end-round" onclick="endRound()">
-                <i class="fa-solid fa-flag-checkered"></i> จบยอดและเริ่มรอบใหม่
+                <i class="fa-solid fa-flag-checkered"></i> จบยอดรอบนี้ / เริ่มรอบใหม่
             </button>
         </div>
 
         <div id="tab-log" class="tab-content">
-            <label class="label">📜 ประวัติการจบยอด</label>
+            <label class="label">📜 คลังประวัติรอบที่จบแล้ว</label>
             <div class="filter-area">
                 <input type="date" id="logDateFilter" class="filter-input" onchange="renderLog()">
-                <button class="btn-clear-filter" onclick="clearFilter()">ล้างตัวกรอง</button>
+                <button class="btn-clear-filter" onclick="clearFilter()">ล้าง</button>
             </div>
             <div id="logList" class="log-grid"></div>
         </div>
@@ -86,6 +82,6 @@
     </footer>
 </div>
 
-<script src="js/script.js"></script>
+<script src="js/script.js?v=2"></script>
 </body>
 </html>
