@@ -2,7 +2,6 @@ let currentMode = 'withdraw';
 let transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
 let sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
 
-// เริ่มต้นระบบเมื่อโหลดหน้า
 updateUI();
 
 function switchTab(tabName) {
@@ -11,7 +10,6 @@ function switchTab(tabName) {
         btn.classList.toggle('active', btn.getAttribute('onclick').includes(tabName));
     });
     document.getElementById(`tab-${tabName}`).classList.add('active');
-
     if (tabName === 'summary') renderSummary();
     if (tabName === 'log') renderLog();
 }
@@ -56,42 +54,22 @@ function deleteEntry(id) {
     updateUI();
 }
 
-function endRound() {
-    if (transactions.length === 0) return alert("ไม่มีรายการให้จบยอด");
-    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่ใช่หรือไม่? ประวัติจะถูกย้ายไปหน้า Log")) return;
-
-    const summary = {};
-    transactions.forEach(t => {
-        if (!summary[t.name]) summary[t.name] = 0;
-        summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
-    });
-
-    const session = {
-        id: Date.now(),
-        date: new Date().toLocaleString('th-TH'),
-        total: transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0),
-        details: summary
-    };
-
-    sessions.unshift(session);
-    transactions = [];
-    saveData();
-    updateUI();
-    switchTab('log');
-}
-
+// ปรับปรุงส่วนการแสดงผลตาราง
 function updateUI() {
     const body = document.getElementById('historyBody');
     body.innerHTML = '';
     
     [...transactions].reverse().forEach(t => {
         const isW = t.type === 'withdraw';
+        // คำนวณขีด (200 = 1 ขีด)
+        const khitValue = t.amount / 200;
+        
         body.insertAdjacentHTML('beforeend', `
             <tr>
                 <td>${t.time}</td>
                 <td><strong>${t.name}</strong></td>
-                <td class="${isW ? 't-red' : 't-green'}">${isW ? '+' : '-'}${t.amount}</td>
-                <td><button class="btn-del" onclick="deleteEntry(${t.id})">×</button></td>
+                <td class="${isW ? 't-red' : 't-green'}">${isW ? '+' : '-'}${t.amount.toLocaleString()}</td>
+                <td class="khit-col">${khitValue} ขีด</td> <td><button class="btn-del" onclick="deleteEntry(${t.id})">×</button></td>
             </tr>
         `);
     });
@@ -100,6 +78,7 @@ function updateUI() {
     document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
+// ส่วนอื่นๆ (renderSummary, renderLog, copySummary, saveData) เหมือนเดิม...
 function renderSummary() {
     const container = document.getElementById('summaryList');
     const summary = {};
@@ -107,26 +86,42 @@ function renderSummary() {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
-
     const keys = Object.keys(summary);
-    if (keys.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af;">ไม่มีข้อมูลในรอบนี้</p>';
-
+    if (keys.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af;">ไม่มีข้อมูล</p>';
     container.innerHTML = keys.map(name => `
         <div class="person-card">
             <span>${name}</span>
-            <strong>${summary[name].toLocaleString()} ฿</strong>
+            <div>
+                <strong>${summary[name].toLocaleString()} ฿</strong>
+                <small style="display:block; color:#94a3af; font-size:0.7rem; text-align:right;">${summary[name]/200} ขีด</small>
+            </div>
         </div>
     `).join('');
+}
+
+function endRound() {
+    if (transactions.length === 0) return alert("ไม่มีรายการให้จบยอด");
+    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่ใช่หรือไม่?")) return;
+    const summary = {};
+    transactions.forEach(t => {
+        if (!summary[t.name]) summary[t.name] = 0;
+        summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
+    });
+    const session = { id: Date.now(), date: new Date().toLocaleString('th-TH'), total: transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0), details: summary };
+    sessions.unshift(session);
+    transactions = [];
+    saveData();
+    updateUI();
+    switchTab('log');
 }
 
 function renderLog() {
     const container = document.getElementById('logList');
     if (sessions.length === 0) return container.innerHTML = '<p style="text-align:center; color:#94a3af;">ยังไม่มีประวัติ</p>';
-
     container.innerHTML = sessions.map(s => `
         <div class="log-card">
             <div class="log-date">🕒 ${s.date}</div>
-            <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿</div>
+            <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿ (${s.total/200} ขีด)</div>
             <div class="log-details">
                 ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name]}</span>`).join('')}
             </div>
@@ -141,7 +136,7 @@ function copySummary() {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
-    Object.keys(summary).forEach(n => text += `- ${n}: ${summary[n]} ฿\n`);
+    Object.keys(summary).forEach(n => text += `- ${n}: ${summary[n]} ฿ (${summary[n]/200} ขีด)\n`);
     navigator.clipboard.writeText(text).then(() => alert("ก๊อปปี้แล้ว!"));
 }
 
