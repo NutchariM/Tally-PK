@@ -12,7 +12,7 @@ const firebaseConfig = {
   appId: "1:849778226457:web:6ec1724e76588358f3c188"
 };
 
-// Initialize Firebase
+// เริ่มต้นระบบ Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -20,25 +20,29 @@ let currentMode = 'withdraw';
 let transactions = [];
 let sessions = [];
 
-// --- 1. Real-time Listeners (อัปเดตข้อมูลอัตโนมัติ) ---
+// --- 1. ระบบ Real-time Listener (หัวใจสำคัญ: ทุกคนเห็นตรงกัน) ---
 
-// ติดตามรายการปัจจุบัน
+// คอยฟัง "รายการเบิก-คืน" ในรอบปัจจุบัน
 onValue(ref(db, 'transactions'), (snapshot) => {
     const data = snapshot.val();
+    // ถ้าไม่มีข้อมูลให้เป็นอาเรย์ว่าง
     transactions = data ? Object.values(data) : [];
-    updateUI();
-    renderSummary();
+    
+    // 🚩 สั่งอัปเดตหน้าจอทั้ง Tab 1 และ Tab 2 ทันทีที่ข้อมูลเปลี่ยน
+    updateUI();       // วาดตารางหน้าแรก (Tab 1)
+    renderSummary();  // วาดหน้าสรุปรายคน (Tab 2)
 });
 
-// ติดตามประวัติรอบเก่า
+// คอยฟัง "ประวัติรอบเก่า" ที่จบไปแล้ว
 onValue(ref(db, 'sessions'), (snapshot) => {
     const data = snapshot.val();
     sessions = data ? Object.values(data).reverse() : [];
-    renderLog();
+    renderLog(); // วาดหน้าประวัติ (Tab 3)
 });
 
-// --- 2. ฟังก์ชันการทำงานหลัก ---
+// --- 2. ฟังก์ชันการทำงาน (ผูกกับปุ่มใน HTML) ---
 
+// สลับโหมด เบิก / คืน
 window.setMode = (mode) => {
     currentMode = mode;
     const isW = mode === 'withdraw';
@@ -48,6 +52,7 @@ window.setMode = (mode) => {
     document.getElementById('return-section').style.display = isW ? 'none' : 'block';
 };
 
+// บันทึกรายการ (ใช้ทั้งเบิกและคืน)
 window.saveEntry = (amount) => {
     const nameInput = document.getElementById('userName');
     const name = nameInput.value.trim();
@@ -66,30 +71,33 @@ window.saveEntry = (amount) => {
         amount: amount
     };
 
-    // ส่งข้อมูลไป Firebase
+    // ส่งข้อมูลไป Firebase Cloud
     push(ref(db, 'transactions'), newTx);
 
-    // ✅ บันทึกเสร็จแล้วเคลียร์ช่องชื่อ และเอา Cursor ไปรอไว้
+    // ✅ UX: เคลียร์ช่องชื่อ และเอา Cursor ไปรอที่เดิม
     nameInput.value = '';
     nameInput.focus();
 };
 
+// จัดการการกดปุ่มบันทึกคืนเงิน
 window.handleReturn = () => {
     const returnInput = document.getElementById('returnAmount');
     const amt = parseInt(returnInput.value);
     
     if (!amt) {
-        alert("ระบุยอดเงินด้วยครับ");
+        alert("ระบุยอดเงินที่จะคืนด้วยครับ");
         returnInput.focus();
         return;
     }
 
-    window.saveEntry(amt); // บันทึกข้อมูล (ซึ่งจะเคลียร์ชื่อให้ด้วย)
+    // เรียกใช้ saveEntry เพื่อบันทึก
+    window.saveEntry(amt);
     
-    // ✅ เคลียร์ช่องยอดเงินคืน
+    // ✅ UX: เคลียร์ช่องระบุยอดเงินคืน
     returnInput.value = '';
 };
 
+// วาดตารางรายการเบิก-คืน (Tab 1)
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
@@ -110,6 +118,7 @@ function updateUI() {
     document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
+// วาดหน้าสรุปยอดรายคน (Tab 2)
 function renderSummary() {
     const container = document.getElementById('summaryList');
     if (!container) return;
@@ -122,7 +131,7 @@ function renderSummary() {
     
     const keys = Object.keys(summary);
     if (keys.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ยังไม่มีข้อมูลในรอบนี้</p>';
+        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ไม่มีรายการในรอบนี้</p>';
         return;
     }
     
@@ -134,9 +143,10 @@ function renderSummary() {
     `).join('');
 }
 
+// จบยอดรอบปัจจุบัน
 window.endRound = () => {
     if (transactions.length === 0) return alert("ยังไม่มีรายการให้จบยอด");
-    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่?")) return;
+    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่? (ทุกคนจะเห็นประวัติรอบนี้พร้อมกัน)")) return;
 
     const summary = {};
     transactions.forEach(t => {
@@ -152,18 +162,21 @@ window.endRound = () => {
         details: summary
     };
 
+    // เก็บเข้าประวัติและล้างรายการปัจจุบันใน Cloud (ทุกคนจะเห็นเป็น 0 พร้อมกัน)
     push(ref(db, 'sessions'), session);
     remove(ref(db, 'transactions'));
-    location.hash = 'log';
+    
+    location.hash = 'log'; // ย้ายไปหน้าประวัติ
 };
 
+// วาดหน้าประวัติ (Tab 3)
 function renderLog() {
     const container = document.getElementById('logList');
     if (!container) return;
     
     const filterValue = document.getElementById('logDateFilter').value;
     if (sessions.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:40px;">ไม่มีประวัติรอบ</p>';
+        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:40px;">ไม่มีประวัติรอบที่จบไปแล้ว</p>';
         return;
     }
 
@@ -192,14 +205,15 @@ window.clearFilter = () => {
     renderLog();
 };
 
+// ปุ่มล้างโลก (Nuclear Reset)
 window.nuclearReset = () => {
-    if (confirm("⚠️ ล้างข้อมูลทั้งหมดถาวร?")) {
+    if (confirm("⚠️ ล้างข้อมูลทั้งหมดถาวร? (เพื่อนทุกคนข้อมูลหายหมดนะครับ)")) {
         remove(ref(db, '/'));
         location.reload();
     }
 };
 
-// --- 3. ระบบจัดการหน้า (Routing) ---
+// --- 3. ระบบจัดการ Tab (Routing) ---
 function handleRouting() {
     const hash = window.location.hash.replace('#', '') || 'record';
     
