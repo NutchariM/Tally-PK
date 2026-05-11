@@ -1,70 +1,57 @@
-// --- 1. ตั้งค่าเริ่มต้นและโหลดข้อมูลจากเครื่อง ---
-let currentMode = 'withdraw'; // โหมดเริ่มต้นคือ "เบิก"
-let transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
-let sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// เรียกใช้งานทันทีเมื่อโหลดหน้าเว็บ
-updateUI();
+// 🚩 Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCr9fXfx9m9cQ9_N_VhE3VTLbgdk3ZXRKM",
+  authDomain: "tally-pk.firebaseapp.com",
+  databaseURL: "https://tally-pk-default-rtdb.asia-southeast1.firebasedatabase.app/", 
+  projectId: "tally-pk",
+  storageBucket: "tally-pk.firebasestorage.app",
+  messagingSenderId: "849778226457",
+  appId: "1:849778226457:web:6ec1724e76588358f3c188"
+};
 
-// --- 2. ฟังก์ชันสลับ Tab และจัดการ Footer ---
-function switchTab(tabName) {
-    // จัดการการแสดงผล Content ของแต่ละ Tab
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(tabName));
-    });
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    // 🚩 ส่วนที่แก้ไข: ซ่อนยอดรวมด้านล่าง (Footer) เมื่อไม่อยู่หน้าบันทึก
-    const footer = document.querySelector('.footer-summary');
-    if (footer) {
-        if (tabName === 'record') {
-            footer.style.display = 'block';
-        } else {
-            footer.style.display = 'none';
-        }
-    }
+let currentMode = 'withdraw';
+let transactions = [];
+let sessions = [];
 
-    // โหลดข้อมูลตามหน้าที่จะไป
-    if (tabName === 'summary') renderSummary();
-    if (tabName === 'log') renderLog();
-}
+// --- 1. Real-time Listeners (คนอื่นกด เราเห็นทันที) ---
 
-// --- 3. ฟังก์ชันจัดการการเบิก-คืน ---
+// ดึงข้อมูลรายการปัจจุบัน
+onValue(ref(db, 'transactions'), (snapshot) => {
+    const data = snapshot.val();
+    transactions = data ? Object.values(data) : [];
+    updateUI();
+    renderSummary();
+});
 
-// สลับโหมด เบิกเงิน / คืนเงิน
-function setMode(mode) {
+// ดึงข้อมูลประวัติรอบเก่า
+onValue(ref(db, 'sessions'), (snapshot) => {
+    const data = snapshot.val();
+    sessions = data ? Object.values(data).reverse() : [];
+    renderLog();
+});
+
+// --- 2. ฟังก์ชันการทำงาน (ใส่ window. เพื่อให้ HTML เรียกใช้ได้) ---
+
+window.setMode = (mode) => {
     currentMode = mode;
     const isW = mode === 'withdraw';
-    
-    // สลับสีปุ่ม Toggle
     document.getElementById('modeWithdraw').classList.toggle('active', isW);
     document.getElementById('modeReturn').classList.toggle('active', !isW);
-    
-    // สลับส่วนแสดงผล (ปุ่มเบิก 200 / ช่องกรอกเงินคืน)
     document.getElementById('withdraw-section').style.display = isW ? 'block' : 'none';
     document.getElementById('return-section').style.display = isW ? 'none' : 'block';
-}
+};
 
-// จัดการการกดบันทึกในโหมด "คืนเงิน" (ระบุยอดเอง)
-function handleReturn() {
-    const input = document.getElementById('returnAmount');
-    const amt = parseInt(input.value);
-    if (!amt) return alert("กรุณาระบุยอดเงินที่คืน");
-    saveEntry(amt);
-    input.value = ''; // ล้างช่องกรอก
-}
-
-// ฟังก์ชันบันทึกข้อมูลลงรายการ (Core Function)
-function saveEntry(amount) {
+window.saveEntry = (amount) => {
     const nameInput = document.getElementById('userName');
     const name = nameInput.value.trim();
-
-    if (!name) {
-        alert("กรุณากรอกชื่อผู้เบิก/คืน");
-        nameInput.focus();
-        return;
-    }
+    if (!name) return alert("กรุณาใส่ชื่อก่อนบันทึกครับ"), nameInput.focus();
 
     const newTx = {
         id: Date.now(),
@@ -74,57 +61,54 @@ function saveEntry(amount) {
         amount: amount
     };
 
-    transactions.push(newTx);
-    saveData(); // บันทึกลง LocalStorage
-    updateUI(); // อัปเดตหน้าจอ
-}
+    // บันทึกไปที่ Firebase
+    push(ref(db, 'transactions'), newTx);
+};
 
-// --- 4. ฟังก์ชันอัปเดตหน้าจอ (UI) ---
+window.handleReturn = () => {
+    const input = document.getElementById('returnAmount');
+    const amt = parseInt(input.value);
+    if (!amt) return alert("ระบุยอดเงินด้วยครับ");
+    window.saveEntry(amt);
+    input.value = '';
+};
 
-// วาดตารางประวัติในรอบปัจจุบัน
 function updateUI() {
     const body = document.getElementById('historyBody');
     if (!body) return;
-    body.innerHTML = '';
     
-    [...transactions].reverse().forEach(t => {
+    body.innerHTML = transactions.slice().reverse().map(t => {
         const isW = t.type === 'withdraw';
-        const khitValue = t.amount / 200; // คำนวณขีด
-        
-        body.insertAdjacentHTML('beforeend', `
+        return `
             <tr>
                 <td>${t.time}</td>
                 <td><strong>${t.name}</strong></td>
                 <td class="${isW ? 't-red' : 't-green'}">${isW ? '+' : '-'}${t.amount.toLocaleString()}</td>
-                <td class="khit-col">${khitValue} ขีด</td>
+                <td class="khit-col">${t.amount / 200} ขีด</td>
             </tr>
-        `);
-    });
+        `;
+    }).join('');
 
-    // อัปเดตยอดรวมกองกลางด้านล่าง
     const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
-    const grandTotalElement = document.getElementById('grandTotal');
-    if (grandTotalElement) {
-        grandTotalElement.innerText = `${total.toLocaleString()} ฿`;
-    }
+    document.getElementById('grandTotal').innerText = `${total.toLocaleString()} ฿`;
 }
 
-// วาดหน้าสรุปยอดรายบุคคล (Tab: สรุปรายคน)
 function renderSummary() {
     const container = document.getElementById('summaryList');
-    const summary = {};
+    if (!container) return;
     
+    const summary = {};
     transactions.forEach(t => {
         if (!summary[t.name]) summary[t.name] = 0;
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
-
+    
     const keys = Object.keys(summary);
     if (keys.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ไม่มีข้อมูลในรอบนี้</p>';
+        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:20px;">ยังไม่มีข้อมูลในรอบนี้</p>';
         return;
     }
-
+    
     container.innerHTML = keys.map(name => `
         <div class="person-card">
             <span>${name}</span>
@@ -133,52 +117,9 @@ function renderSummary() {
     `).join('');
 }
 
-// วาดหน้าประวัติรอบที่จบไปแล้ว พร้อมระบบ Filter (Tab: ประวัติรอบ)
-function renderLog() {
-    const container = document.getElementById('logList');
-    const filterValue = document.getElementById('logDateFilter').value; // YYYY-MM-DD
-    
-    if (sessions.length === 0) {
-        container.innerHTML = '<p class="empty-msg">ยังไม่มีประวัติการจบยอด</p>';
-        return;
-    }
-
-    let filteredSessions = sessions;
-
-    // ระบบกรองตามวันที่
-    if (filterValue) {
-        filteredSessions = sessions.filter(s => {
-            const sessionDate = new Date(s.id).toISOString().split('T')[0];
-            return sessionDate === filterValue;
-        });
-    }
-
-    if (filteredSessions.length === 0) {
-        container.innerHTML = '<p class="empty-msg">ไม่พบข้อมูลในวันที่เลือก</p>';
-        return;
-    }
-
-    container.innerHTML = filteredSessions.map(s => `
-        <div class="log-card">
-            <div class="log-date">🕒 ${s.date}</div>
-            <div style="font-weight:bold; margin:5px 0;">ยอดรวมรอบนี้: ${s.total.toLocaleString()} ฿</div>
-            <div class="log-details">
-                ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name].toLocaleString()}</span>`).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-// ล้างตัวกรองวันที่
-function clearFilter() {
-    document.getElementById('logDateFilter').value = '';
-    renderLog();
-}
-
-// จบยอดรอบปัจจุบันและบันทึกลง Log
-function endRound() {
-    if (transactions.length === 0) return alert("ไม่มีรายการให้จบยอด");
-    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่ใช่หรือไม่?")) return;
+window.endRound = () => {
+    if (transactions.length === 0) return alert("ยังไม่มีรายการให้จบยอด");
+    if (!confirm("จบยอดรอบนี้และเริ่มรอบใหม่? ข้อมูลจะถูกย้ายไปที่หน้า 'ประวัติรอบ'")) return;
 
     const summary = {};
     transactions.forEach(t => {
@@ -186,22 +127,82 @@ function endRound() {
         summary[t.name] += (t.type === 'withdraw' ? t.amount : -t.amount);
     });
 
-    const session = { 
-        id: Date.now(), // ใช้ timestamp สำหรับ filter วันที่
-        date: new Date().toLocaleString('th-TH'), 
-        total: transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0), 
-        details: summary 
+    const total = transactions.reduce((s, t) => s + (t.type === 'withdraw' ? t.amount : -t.amount), 0);
+    
+    const session = {
+        id: Date.now(),
+        date: new Date().toLocaleString('th-TH'),
+        total: total,
+        details: summary
     };
 
-    sessions.unshift(session);
-    transactions = [];
-    saveData();
-    updateUI();
-    switchTab('log');
+    // เก็บเข้าประวัติและล้างรายการปัจจุบันบน Cloud
+    push(ref(db, 'sessions'), session);
+    remove(ref(db, 'transactions'));
+    
+    location.hash = 'log';
+};
+
+function renderLog() {
+    const container = document.getElementById('logList');
+    if (!container) return;
+    
+    const filterValue = document.getElementById('logDateFilter').value;
+    if (sessions.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#94a3af; padding:40px;">ไม่มีประวัติรอบที่จบไปแล้ว</p>';
+        return;
+    }
+
+    let filtered = sessions;
+    if (filterValue) {
+        filtered = sessions.filter(s => {
+            try {
+                return new Date(s.id).toISOString().split('T')[0] === filterValue;
+            } catch(e) { return false; }
+        });
+    }
+
+    container.innerHTML = filtered.map(s => `
+        <div class="log-card">
+            <div class="log-date">🕒 จบเมื่อ: ${s.date}</div>
+            <div style="font-weight:bold; margin:5px 0;">ยอดรวม: ${s.total.toLocaleString()} ฿</div>
+            <div class="log-details">
+                ${Object.keys(s.details).map(name => `<span>${name}: ${s.details[name].toLocaleString()}</span>`).join('')}
+            </div>
+        </div>
+    `).join('');
 }
 
-// --- 5. การจัดการข้อมูลคงที่ (Persistence) ---
-function saveData() {
-    localStorage.setItem('myTransactions', JSON.stringify(transactions));
-    localStorage.setItem('mySessions', JSON.stringify(sessions));
+window.clearFilter = () => {
+    document.getElementById('logDateFilter').value = '';
+    renderLog();
+};
+
+window.nuclearReset = () => {
+    if (confirm("⚠️ ล้างข้อมูลทั้งหมดบน Cloud? ข้อมูลของทุกคนจะหายถาวรนะครับ!")) {
+        remove(ref(db, '/'));
+        location.reload();
+    }
+};
+
+// --- 3. ระบบจัดการหน้า (Routing) ---
+function handleRouting() {
+    const hash = window.location.hash.replace('#', '') || 'record';
+    
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+
+    const targetTab = document.getElementById(`tab-${hash}`);
+    const targetBtn = document.getElementById(`btn-${hash}`);
+    
+    if (targetTab && targetBtn) {
+        targetTab.classList.add('active');
+        targetBtn.classList.add('active');
+    }
+
+    const footer = document.querySelector('.footer-summary');
+    if (footer) footer.style.display = (hash === 'record') ? 'block' : 'none';
 }
+
+window.addEventListener('hashchange', handleRouting);
+window.addEventListener('load', handleRouting);
