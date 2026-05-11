@@ -1,9 +1,9 @@
-/* 🎨 Tally-PK: Global Design System (v4.0) */
+/* 🎨 Tally-PK: Global Design System (v5.7) */
 :root {
-    --primary-start: #6366f1; /* ม่วงคราม */
-    --primary-end: #a855f7;   /* ม่วงสว่าง */
-    --withdraw: #ef4444;      /* แดงสำหรับเบิก (-) */
-    --return: #10b981;        /* เขียวสำหรับคืน (+) */
+    --primary-start: #6366f1;
+    --primary-end: #a855f7;
+    --withdraw: #ef4444;
+    --return: #10b981;
     --bg: #f8fafc;
     --card-bg: #ffffff;
     --text-main: #1e293b;
@@ -26,6 +26,7 @@ body {
     padding: 0;
 }
 
+/* 📱 Container: เงาหนาชัดเจนตามที่ต้องการ */
 .app-container {
     max-width: 500px;
     margin: 0 auto;
@@ -33,10 +34,13 @@ body {
     display: flex;
     flex-direction: column;
     background-color: #fff;
-    box-shadow: 0 0 50px #ffffff99, 20px 0 60px rgba(0, 0, 0, 0.08), -20px 0 60px rgba(0, 0, 0, 0.08);
+    position: relative;
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.6), 
+                20px 0 60px rgba(0, 0, 0, 0.08), 
+                -20px 0 60px rgba(0, 0, 0, 0.08);
 }
 
-/* 📍 Header: ม่วง Gradient ไล่สี */
+/* 📍 Header: ม่วง Gradient */
 .main-header {
     background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%); 
     padding: 20px 15px 15px;
@@ -58,7 +62,7 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-/* 🧭 Modern Tab Navigation (Glassmorphism) */
+/* 🧭 Tab Navigation */
 .tab-nav {
     display: flex;
     background: rgba(255, 255, 255, 0.15);
@@ -90,25 +94,16 @@ body {
 }
 
 /* 📝 Content Area */
-.content-area {
-    padding: 20px 15px 120px;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
+.content-area { padding: 20px 15px 120px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ⌨️ Form Elements */
+/* ⌨️ Form Elements & Edit Button System */
 .label {
     display: block;
     font-weight: bold;
@@ -123,212 +118,22 @@ body {
     border: 2px solid var(--border);
     border-radius: 12px;
     font-size: 1rem;
-    margin-bottom: 20px;
     outline: none;
     transition: 0.2s;
     font-family: inherit;
 }
 
-.main-input:focus {
-    border-color: var(--primary-start);
-    background: white;
-}
+.main-input:focus { border-color: var(--primary-start); background: white; }
 
-.action-toggle {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.toggle-btn {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: white;
-    font-weight: bold;
-    cursor: pointer;
+/* 🚩 State: เมื่อช่องชื่อถูกล็อก */
+.main-input:disabled {
+    background-color: #f1f5f9;
     color: var(--text-sub);
+    cursor: not-allowed;
+    border-style: dashed;
+    opacity: 0.7;
 }
 
-.toggle-btn.active {
-    border-color: var(--primary-start);
-    background: #eef2ff;
-    color: var(--primary-start);
-}
-
-/* 🔘 Submit Buttons */
-.btn-submit {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 14px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.btn-withdraw { background: var(--withdraw); }
-.btn-return { background: var(--return); }
-.btn-submit:active { transform: scale(0.97); }
-
-/* 📊 Summary & History Cards */
-.person-card, .log-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--radius);
-    margin-bottom: 15px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.history-table th {
-    text-align: left;
-    padding: 10px;
-    font-size: 0.8rem;
-    color: var(--text-sub);
-    border-bottom: 2px solid var(--border);
-}
-
-.history-table td {
-    padding: 14px 10px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-/* 🎨 Text Colors */
-.t-red { color: var(--withdraw); font-weight: bold; }
-.t-green { color: var(--return); font-weight: bold; }
-
-/* 📅 Filter Area */
-.filter-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    background: white;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-}
-
-.btn-clear-filter {
-    background: #f1f5f9;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    color: var(--text-sub);
-    cursor: pointer;
-}
-
-/* 📜 Log Details */
-.log-details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed var(--border);
-}
-
-.log-details span {
-    background: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-/* 💰 Sticky Footer Summary */
-.footer-summary {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 500px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-top: 1px solid var(--border);
-    display: flex; /* เปลี่ยนเป็น flex ตามที่ JS สั่งไว้ */
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
-    z-index: 100;
-}
-
-.footer-summary h2 {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 900;
-}
-
-/* 🔚 Nuclear Buttons */
-.btn-end-round {
-    width: 100%;
-    padding: 14px;
-    background: #1e293b;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    margin-top: 30px;
-}
-/* 📅 Modern Date Input (Bootstrap Style) */
-.filter-input-modern {
-    border: 2px solid var(--border) !important;
-    border-radius: 10px !important;
-    padding: 8px 12px !important;
-    font-family: 'Sarabun', sans-serif;
-    color: var(--text-main);
-    background-color: #ffffff;
-    outline: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    width: 100%;
-    /* ปรับแต่งไอคอนปฏิทินของเบราว์เซอร์ให้ดูเบาลง */
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-.filter-input-modern:focus {
-    border-color: var(--primary-start) !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-/* 🚩 ลบสไตล์เดิมๆ ของลูกศรและปุ่มล้างใน Chrome/Safari */
-::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(215deg) brightness(95%) contrast(80%);
-    /* ทำให้ไอคอนปฏิทินเป็นสีม่วงเข้ากับแอป */
-}
-
-/* ปรับปรุง Filter Area ให้ดูเหมือน Bootstrap Card */
-.filter-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #ffffff;
-    padding: 10px 15px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-}/* --- ส่วนเพิ่มเติมสำหรับระบบ Edit ชื่อ และ Badge ตรวจสอบเครื่อง --- */
-
-/* จัดกลุ่มช่อง Input ชื่อกับปุ่ม Edit ให้ขนานกัน */
-.input-group div[style*="display: flex"] {
-    margin-bottom: 20px;
-}
-
-/* ปรับแต่งปุ่ม Edit (รูปปากกา) */
 #btn-edit-name {
     transition: all 0.2s ease;
     border: 1px solid var(--border) !important;
@@ -339,25 +144,51 @@ body {
     color: var(--primary-start) !important;
 }
 
-#btn-edit-name:active {
-    transform: scale(0.95);
+#btn-edit-name:active { transform: scale(0.95); }
+
+/* 🔘 Toggle & Submit Buttons */
+.action-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
+.toggle-btn {
+    flex: 1; padding: 12px; border: 2px solid var(--border);
+    border-radius: 12px; background: white; font-weight: bold;
+    cursor: pointer; color: var(--text-sub);
+}
+.toggle-btn.active {
+    border-color: var(--primary-start); background: #eef2ff; color: var(--primary-start);
 }
 
-/* ปรับความใสของ Input เมื่อถูกล็อก (Disabled) */
-.main-input:disabled {
-    background-color: #f1f5f9;
-    color: var(--text-sub);
-    cursor: not-allowed;
-    border-style: dashed; /* ทำให้ดูรู้ว่าล็อกไว้แต่แก้ได้ */
+.btn-submit {
+    width: 100%; padding: 16px; border: none; border-radius: 14px;
+    font-size: 1.1rem; font-weight: bold; color: white; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-withdraw { background: var(--withdraw); }
+.btn-return { background: var(--return); }
+.btn-submit:active { transform: scale(0.97); }
+
+/* 📊 Summary & History Table */
+.person-card, .log-card {
+    background: white; padding: 20px; border-radius: var(--radius);
+    margin-bottom: 15px; border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
-/* Badge รุ่นมือถือ (via Device) ในตารางประวัติ */
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th {
+    text-align: left; padding: 10px; font-size: 0.8rem;
+    color: var(--text-sub); border-bottom: 2px solid var(--border);
+}
+.history-table td { padding: 14px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+
+/* 🎨 Text Colors & Badges */
+.t-red { color: var(--withdraw); font-weight: bold; }
+.t-green { color: var(--return); font-weight: bold; }
+
+/* Badge รุ่นมือถือ */
 .history-table td small {
     display: inline-block;
     margin-top: 4px;
     font-weight: 500;
-    letter-spacing: 0.3px;
-    /* ใช้สีที่ดูสะอาดตา ไม่แย่งซีนชื่อ */
     color: #94a3af;
     background: #f1f5f9;
     padding: 2px 8px;
@@ -365,7 +196,7 @@ body {
     font-size: 0.65rem;
 }
 
-/* Note ประวัติการเปลี่ยนชื่อ (Rename Note) */
+/* Rename Note */
 .history-table td small[style*="italic"] {
     background: transparent;
     padding: 0;
@@ -374,13 +205,63 @@ body {
     margin-top: 2px;
 }
 
-/* ปรับปรุง Footer ให้เนื้อหาดูสมดุล */
-.footer-summary div {
-    line-height: 1.2;
+/* 📅 Filter Area & Date Input */
+.filter-area {
+    display: flex; align-items: center; gap: 12px; background: #ffffff;
+    padding: 10px 15px; border-radius: 14px; border: 1px solid var(--border);
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
-.footer-summary h2 {
-    font-size: 1.4rem; /* ปรับขนาดให้พอดี ไม่ใหญ่จนล้น */
-    letter-spacing: -0.5px;
+.filter-input-modern {
+    border: 2px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    font-family: inherit;
+    color: var(--text-main);
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
+.filter-input-modern:focus {
+    border-color: var(--primary-start) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(215deg) brightness(95%) contrast(80%);
+}
+
+.btn-clear-filter {
+    background: #f1f5f9; border: none; padding: 8px 16px;
+    border-radius: 8px; font-weight: 700; color: var(--text-sub); cursor: pointer;
+}
+
+/* 📜 Log Details */
+.log-details {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border);
+}
+
+.log-details span {
+    background: #f8fafc; padding: 8px 12px; border-radius: 10px;
+    font-size: 0.85rem; display: flex; justify-content: space-between;
+}
+
+/* 💰 Sticky Footer */
+.footer-summary {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-width: 500px; margin: 0 auto; background: white;
+    padding: 15px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 100;
+}
+
+.footer-summary h2 { margin: 0; font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; }
+
+/* 🔚 Nuclear Buttons */
+.btn-end-round {
+    width: 100%; padding: 14px; background: #1e293b; color: white;
+    border: none; border-radius: 12px; font-weight: bold; margin-top: 30px;
+}
