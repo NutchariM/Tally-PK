@@ -1,7 +1,7 @@
 let selectedUser = 'มด';
 let currentMode = 'withdraw';
 
-// เก็บยอดรวมเงินของแต่ละคน
+// เก็บยอดเงินแยกรายคน
 const balances = {
     'มด': 0,
     'Rex': 0,
@@ -38,45 +38,45 @@ function changeType(mode) {
 function handleReturnSave() {
     const input = document.getElementById('returnAmount');
     const val = parseInt(input.value);
-    if (!val) {
-        alert("กรุณาระบุจำนวนเงินที่คืน");
-        return;
-    }
+    if (!val) return alert("กรุณาระบุจำนวนเงิน");
     saveData(val);
     input.value = '';
 }
 
 function saveData(amount) {
-    const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     const isWithdraw = currentMode === 'withdraw';
     
-    // 1. อัปเดตยอดเงินใน Object ของแต่ละคน
-    if (isWithdraw) {
-        balances[selectedUser] += amount;
-    } else {
-        balances[selectedUser] -= amount;
-    }
+    // อัปเดตยอดเงินรายคน
+    if (isWithdraw) balances[selectedUser] += amount;
+    else balances[selectedUser] -= amount;
 
-    // 2. อัปเดต UI รายคน (Individual Card)
-    const userKhits = balances[selectedUser] / 200;
-    document.getElementById(`val-${selectedUser}`).innerText = userKhits;
+    // คำนวณขีด (200 = 1 ขีด)
+    const khitCount = amount / 200;
+    let khitDisplay = "";
+    for(let i=0; i < Math.floor(khitCount); i++) khitDisplay += " |";
+    if (khitCount % 1 !== 0) khitDisplay += " (เศษ)"; 
+
+    // อัปเดตการแสดงผลรายคน
+    document.getElementById(`val-${selectedUser}`).innerText = balances[selectedUser] / 200;
     document.getElementById(`baht-${selectedUser}`).innerText = `${balances[selectedUser].toLocaleString()} ฿`;
 
-    // 3. คำนวณยอดรวมทั้งกอง
-    let totalBaht = Object.values(balances).reduce((a, b) => a + b, 0);
+    // อัปเดตยอดรวมทั้งกอง
+    const totalBaht = Object.values(balances).reduce((a, b) => a + b, 0);
     document.getElementById('totalUnit').innerText = `${totalBaht / 200} ขีด`;
     document.getElementById('totalBaht').innerText = `${totalBaht.toLocaleString()} ฿`;
 
-    // 4. เพิ่มลงตารางประวัติ
-    const historyBody = document.getElementById('historyBody');
-    const unitChange = amount / 200;
+    // เพิ่มประวัติ
+    const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     const row = `
         <tr>
             <td>${time}</td>
-            <td><strong>${selectedUser}</strong></td>
-            <td class="${isWithdraw ? 'badge-w' : 'badge-r'}">${isWithdraw ? '↗ เบิก' : '↩ คืน'}</td>
-            <td class="${isWithdraw ? 'badge-w' : 'badge-r'}">${isWithdraw ? '+' : '-'}${unitChange} ขีด</td>
+            <td><span class="user-badge">${selectedUser}</span></td>
+            <td class="${isWithdraw ? 'text-red' : 'text-green'}">${isWithdraw ? '↗ เบิก' : '↩ คืน'}</td>
+            <td class="${isWithdraw ? 'text-red' : 'text-green'}">
+                ${isWithdraw ? '+' : '-'}${amount} 
+                <span class="khit-symbol">${khitDisplay}</span>
+            </td>
         </tr>
     `;
-    historyBody.insertAdjacentHTML('afterbegin', row);
+    document.getElementById('historyBody').insertAdjacentHTML('afterbegin', row);
 }
