@@ -2,7 +2,6 @@ let currentMode = 'withdraw';
 let transactions = JSON.parse(localStorage.getItem('myTransactions')) || [];
 let sessions = JSON.parse(localStorage.getItem('mySessions')) || [];
 
-// เริ่มต้นระบบเมื่อโหลดหน้า
 updateUI();
 
 function switchTab(tabName) {
@@ -12,7 +11,6 @@ function switchTab(tabName) {
     });
     document.getElementById(`tab-${tabName}`).classList.add('active');
 
-    // ซ่อนยอดรวมด้านล่างเมื่อไม่อยู่หน้าบันทึก
     const footer = document.querySelector('.footer-summary');
     if (footer) {
         footer.style.display = (tabName === 'record') ? 'block' : 'none';
@@ -102,6 +100,7 @@ function renderSummary() {
     `).join('');
 }
 
+// 🚩 เพิ่มฟังก์ชัน "ไม่พบรายการ" เมื่อค้นหาแล้วไม่เจอ
 function renderLog() {
     const container = document.getElementById('logList');
     const filterValue = document.getElementById('logDateFilter').value;
@@ -116,6 +115,7 @@ function renderLog() {
         });
     }
 
+    // จุดแก้ไข: แสดงข้อความเมื่อ Filter แล้วไม่เจอข้อมูล
     if (filterValue && filteredSessions.length === 0) {
         container.innerHTML = '<p class="empty-msg">❌ ไม่พบข้อมูลในวันที่เลือก</p>';
         return;
