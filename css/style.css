@@ -1,165 +1,153 @@
-/* 🎨 Tally-PK: Modern & Rounded Design System */
+/* 🎨 Tally-PK: Modern App Input Style */
 :root {
-    --primary: #6C5CE7;       /* สีม่วงหลัก */
-    --withdraw: #ef4444;       /* สีแดงเบิก (-) */
-    --return: #10b981;         /* สีเขียวคืน (+) */
-    --bg-app: #fcfcfc;        /* พื้นหลังเว็บสีเทาอ่อนมาก */
-    --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-sub: #64748b;
-    --border: #dfe6e9;        /* เส้นขอบนุ่มนวล */
-    
-    /* Variables สำหรับความโค้งมน */
-    --radius-full: 50px;
-    --radius-lg: 16px;        /* สำหรับ Card, Input ใหญ่ */
-    --radius-md: 12px;        /* สำหรับปุ่ม, Element ทั่วไป */
-    --shadow: 0 4px 10px rgba(0,0,0,0.03); /* เงาฟุ้งๆ บางๆ */
+    --primary: #6C5CE7;
+    --primary-soft: rgba(108, 92, 231, 0.1);
+    --withdraw: #ff4757;
+    --return: #2ed573;
+    --bg-app: #F8F9FD; /* สีพื้นหลังแอปโทนสว่างที่ดูแพงกว่าสีเทา */
+    --text-main: #2D3436;
+    --text-sub: #A4B0BE;
+    --border: #EDF2F7;
+    --radius: 16px; /* ความโค้งมนที่ดูพอดี */
+    --shadow-input: 0 2px 6px rgba(0,0,0,0.02);
 }
 
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    /* border-radius: 0 !important; <-- ลบบรรทัดนี้ออกแล้วครับ! */
 }
 
 body {
-    font-family: 'Sarabun', sans-serif;
+    font-family: 'Sarabun', -apple-system, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: var(--bg-app);
-    color: var(--text-main);
+    background-color: #1a1a1a; /* พื้นหลังข้างนอก */
     display: flex;
     justify-content: center;
 }
 
-/* 📱 Container คุมความกว้าง Web View */
 .app-container {
     width: 100%;
-    max-width: 480px;
-    min-height: 100vh;
-    background: var(--card-bg);
+    max-width: 450px;
+    height: 100dvh; /* แก้ปัญหา Safari Toolbar */
+    background: var(--bg-app);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 30px rgba(0,0,0,0.03); /* เงาด้านข้างเวลาดูบน Desktop */
+    overflow: hidden;
 }
 
-/* 📍 Header สีม่วงพร้อมขอบมนด้านล่าง */
+/* 📍 Header: ม่วงสดใส */
 .main-header {
     background: var(--primary);
     padding: 25px 20px 15px;
     color: white;
     text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
 }
 
 .main-header h1 {
     font-size: 1.4rem;
-    margin: 0 0 20px;
+    margin: 0 0 15px;
     font-weight: 800;
 }
 
-/* Tab Navigation - แบบโค้ดเดิมที่ดูดี */
 .tab-nav {
     display: flex;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.15);
     padding: 4px;
-    border-radius: var(--radius-full);
+    border-radius: 100px;
 }
 
 .tab-item {
     flex: 1;
     border: none;
-    padding: 12px;
-    border-radius: var(--radius-full);
+    padding: 10px;
+    border-radius: 100px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.7);
     background: transparent;
-    transition: 0.2s;
 }
 
 .tab-item.active {
     background: white;
     color: var(--primary);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 /* 📝 Content Area */
 .content-area {
-    padding: 20px 15px 120px;
+    padding: 24px 20px;
     flex: 1;
+    overflow-y: auto;
 }
 
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* ⌨️ Form Elements - Modern style (Rounded & Minimal) */
+/* ⌨️ แก้ไข Form Input ให้ดูเป็น "แอป" ไม่ใช่ "ฟอร์มโบราณ" */
 .form-group {
-    margin-bottom: 25px;
+    margin-bottom: 24px;
 }
 
 .label {
     display: block;
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 8px;
-    font-size: 0.9rem;
-    color: var(--text-main);
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* ช่อง Input ดีไซน์ใหม่ให้ดูทันสมัย ไม่โบราณ */
 .main-input {
     width: 100%;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md); /* เพิ่มความโค้งมน */
+    padding: 16px 18px;
+    border: 1.5px solid var(--border); /* เส้นขอบบางๆ สะอาดตา */
+    border-radius: var(--radius);
     background: white;
     font-size: 1.1rem;
-    margin-bottom: 20px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    font-family: inherit;
     color: var(--text-main);
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-input);
+    
+    /* 🚩 ลบสไตล์เดิมของ Safari ออกให้หมด */
+    -webkit-appearance: none; 
+    appearance: none;
 }
 
+/* เมื่อคลิกที่ช่อง Input (Focus State) */
 .main-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); /* สีม่วงเรืองแสงเวลาคลิก */
+    background: #fff;
+    box-shadow: 0 0 0 4px var(--primary-soft); /* เพิ่มวงแหวนม่วงจางๆ ดูทันสมัย */
 }
 
-input::placeholder {
-    color: #cbd5e1;
+.main-input::placeholder {
+    color: #CBD5E0;
+    font-weight: 400;
 }
 
-/* ปุ่มสลับโหมด - คืนความขอบมน */
+/* ปุ่มสลับโหมด */
 .action-toggle {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 12px;
+    padding: 14px;
     border: 1px solid var(--border);
-    border-radius: var(--radius-md); /* คืนขอบมน */
+    border-radius: var(--radius);
     background: white;
     font-weight: 700;
-    cursor: pointer;
     color: var(--text-sub);
+    transition: 0.2s;
+    box-shadow: var(--shadow-input);
 }
 
 .toggle-btn.active#modeWithdraw {
-    background: var(--primary);
+    background: var(--withdraw);
     color: white;
-    border-color: var(--primary);
+    border-color: var(--withdraw);
 }
 
 .toggle-btn.active#modeReturn {
@@ -168,87 +156,39 @@ input::placeholder {
     border-color: var(--return);
 }
 
-/* 🔘 Submit Button - ขอบมนเด่นชัด */
+/* 🔘 Submit Button */
 .btn-submit {
     width: 100%;
-    padding: 16px;
+    padding: 18px;
     border: none;
-    border-radius: var(--radius-md); /* คืนขอบมน */
+    border-radius: var(--radius);
     font-size: 1.1rem;
-    font-weight: bold;
+    font-weight: 800;
     color: white;
+    background: var(--primary);
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.2);
+    transition: 0.2s;
 }
 
-.btn-withdraw { background: var(--withdraw); }
-.btn-return { background: var(--return); }
-
-/* 📊 Summary Cards (Tab 2) - ขอบมนนุ่มๆ */
-.person-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--radius-lg); /* คืนขอบมนนุ่มๆ */
-    margin-bottom: 15px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+.btn-submit:active {
+    transform: scale(0.97);
 }
 
-.person-card strong {
-    font-size: 1.1rem;
-}
-
-/* 📜 History Table - ไม่ต้องมนมากแต่ขอบเส้นชัด */
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.history-table th {
-    text-align: left;
-    padding: 10px;
-    font-size: 0.8rem;
-    color: var(--text-sub);
-    border-bottom: 2px solid var(--border);
-}
-
-.history-table td {
-    padding: 14px 10px;
-    border-bottom: 1px solid #f8fafc;
-}
-
-.t-red { color: var(--withdraw); font-weight: bold; }
-.t-green { color: var(--return); font-weight: bold; }
-
-/* 💰 Sticky Footer - ขอบมนด้านบนแยก Layer */
+/* 💰 Footer */
 .footer-summary {
-    position: sticky;
-    bottom: 0;
     background: white;
-    padding: 18px 20px;
-    border-top: 1px solid var(--border);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0; /* มนเฉพาะขอบบน */
+    padding: 20px 25px;
+    border-radius: 24px 24px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.03);
 }
 
 .footer-summary h2 {
     margin: 0;
-    font-size: 1.7rem;
-    font-weight: 800;
-    color: #1e8449; /* สีเขียวเข้มสำหรับยอดบวก */
-}
-
-/* 🔙 จบยอด Button */
-.btn-end-round {
-    width: 100%;
-    padding: 12px;
-    background: #1e293b;
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: bold;
-    margin-top: 25px;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #1E8449;
 }
