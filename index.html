@@ -32,15 +32,15 @@
                 <button id="modeReturn" class="toggle-btn" onclick="setMode('return')">คืนเงิน</button>
             </div>
 
-            <div id="withdraw-section">
+            <div id="withdraw-section" class="button-section">
                 <button class="btn-submit btn-withdraw" onclick="saveEntry(200)">
                     บันทึกเบิกเงิน <strong>200 ฿</strong>
                 </button>
             </div>
 
-            <div id="return-section" style="display: none;">
+            <div id="return-section" class="button-section" style="display: none;">
                 <input type="number" id="returnAmount" class="main-input" placeholder="ระบุยอดเงินที่คืน" inputmode="numeric">
-                <button class="btn-submit btn-return" onclick="handleReturn()" style="margin-top:10px;">บันทึกคืนเงิน</button>
+                <button class="btn-submit btn-return" onclick="handleReturn()" style="margin-top:15px;">บันทึกคืนเงิน</button>
             </div>
 
             <div class="history-container">
@@ -51,8 +51,8 @@
                             <tr>
                                 <th>เวลา</th>
                                 <th>ชื่อ</th>
-                                <th>ยอด</th>
-                                <th></th>
+                                <th>ยอด (฿)</th>
+                                <th>ขีด (|)</th> <th></th>
                             </tr>
                         </thead>
                         <tbody id="historyBody"></tbody>
