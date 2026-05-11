@@ -3,24 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เลือกระบบ</title>
+    <title>บันทึกการเงิน</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="home-container">
-        <h1>🎯 เลือกระบบที่ต้องการใช้งาน</h1>
-        <div class="menu-grid">
-            <a href="tally.html" class="menu-card">
-                <div class="card-icon">📊</div>
-                <h2>Tally Chart</h2>
-                <p>ระบบนับแบบ Tally Marks</p>
-            </a>
-            <a href="money.html" class="menu-card">
-                <div class="card-icon">💰</div>
-                <h2>บันทึกการเงิน</h2>
-                <p>ระบบเบิก-คืนเงิน</p>
-            </a>
+    <div class="container">
+        <div class="header">
+            <h1>💰 บันทึกการเงิน</h1>
+            <div class="balance">
+                <div class="balance-amount">200 บาท = 1 ชีต</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- กรอกชื่อผู้เบิก/คืน -->
+            <div class="section">
+                <div class="section-title">👤 ชื่อผู้เบิก/คืน</div>
+                <input type="text" id="personInput" placeholder="กรอกชื่อผู้เบิก/คืน" />
+            </div>
+
+            <!-- เบิกเงิน/คืนเงิน -->
+            <div class="section">
+                <div class="tabs">
+                    <button class="tab active" onclick="selectType('เบิก')">เบิกเงิน</button>
+                    <button class="tab" onclick="selectType('คืน')">คืนเงิน</button>
+                </div>
+
+                <input type="text" id="amountInput" placeholder="จำนวนเงินที่เบิก" readonly />
+                
+                <div class="amount-shortcuts">
+                    <button class="shortcut-btn" onclick="addAmount(200)">+200</button>
+                    <button class="shortcut-btn" onclick="addAmount(500)">+500</button>
+                    <button class="shortcut-btn" onclick="addAmount(1000)">+1,000</button>
+                    <button class="shortcut-btn" onclick="addAmount(2000)">+2,000</button>
+                </div>
+
+                <button class="submit-btn" onclick="submitTransaction()">บันทึก</button>
+            </div>
+
+            <!-- สรุปยอดคงเหลือ -->
+            <div class="summary">
+                <div class="summary-title">ยอดรวมวันนี้</div>
+                <div class="summary-amount" id="totalAmount">0 ฿</div>
+                <div class="summary-count" id="transactionCount">0 ชีต</div>
+            </div>
+
+            <!-- ประวัติการเบิก -->
+            <div class="history">
+                <div class="history-title">📋 ประวัติการเบิก</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>ผู้เบิก/คืน</th>
+                            <th>ประเภท</th>
+                            <th>จำนวน</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="4" class="empty-state">ยังไม่มีรายการ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <script src="js/money.js"></script>
 </body>
 </html>
