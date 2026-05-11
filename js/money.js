@@ -1,97 +1,88 @@
-let selectedType = 'เบิก';
-let transactions = [];
-let currentAmount = 0;
+let selectedUser = 'มด';
+let currentType = 'withdraw';
+let totalMoney = 0;
 
-function selectType(type) {
-    selectedType = type;
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.textContent.includes(type)) {
-            tab.classList.add('active');
-        }
-    });
+function selectUser(user, element) {
+    selectedUser = user;
+    // เปลี่ยนสถานะปุ่ม Chip
+    document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
 }
 
-function addAmount(amount) {
+function changeType(type) {
+    currentType = type;
+    const btnW = document.getElementById('typeWithdraw');
+    const btnR = document.getElementById('typeReturn');
     const input = document.getElementById('amountInput');
-    currentAmount += amount;
-    input.value = currentAmount.toLocaleString();
+
+    if (type === 'withdraw') {
+        btnW.classList.add('active');
+        btnR.classList.remove('active');
+        input.placeholder = "จำนวนเงินที่เบิก";
+    } else {
+        btnR.classList.add('active');
+        btnW.classList.remove('active');
+        input.placeholder = "จำนวนเงินที่คืน";
+    }
 }
 
-function submitTransaction() {
-    const personInput = document.getElementById('personInput');
+function addValue(val) {
+    const input = document.getElementById('amountInput');
+    const current = parseInt(input.value) || 0;
+    input.value = current + val;
+}
+
+function handleSave() {
     const amountInput = document.getElementById('amountInput');
-    const person = personInput.value.trim();
-    const amount = currentAmount || parseInt(amountInput.value.replace(/,/g, '')) || 0;
+    const amount = parseInt(amountInput.value);
 
-    if (!person) {
-        alert('กรุณากรอกชื่อผู้เบิก/คืน');
-        return;
-    }
-
-    if (amount === 0) {
-        alert('กรุณาใส่จำนวนเงิน');
+    if (!amount) {
+        alert("กรุณากรอกจำนวนเงิน");
         return;
     }
 
     const now = new Date();
-    const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-
-    const transaction = {
-        time: time,
-        person: person,
-        type: selectedType,
-        amount: amount,
-        isIncome: selectedType === 'เบิก'
-    };
-
-    transactions.unshift(transaction);
-    renderHistory();
-    updateSummary();
-
-    // Reset
-    personInput.value = '';
-    amountInput.value = '';
-    currentAmount = 0;
-}
-
-function renderHistory() {
-    const tbody = document.getElementById('historyBody');
+    const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
     
-    if (transactions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">ยังไม่มีรายการ</td></tr>';
-        return;
-    }
+    // คำนวณขีด
+    const unit = amount / 200;
 
-    tbody.innerHTML = transactions.map(t => `
+    // เพิ่มในตาราง
+    const historyBody = document.getElementById('historyBody');
+    const typeLabel = currentType === 'withdraw' ? 
+        `<span class="badge-withdraw">↗ เบิก</span>` : 
+        `<span class="badge-return">↩ คืน</span>`;
+    
+    const amountColor = currentType === 'withdraw' ? 'style="color: #ef4444; font-weight:bold;"' : 'style="color: #10b981; font-weight:bold;"';
+    const amountSign = currentType === 'withdraw' ? '+' : '-';
+
+    const row = `
         <tr>
-            <td>${t.time}</td>
-            <td><span class="badge" style="background: #e3f2fd; color: #1976d2;">${t.person}</span></td>
-            <td><span class="badge ${t.isIncome ? 'badge-income' : 'badge-expense'}">${t.type}</span></td>
-            <td class="${t.isIncome ? 'amount-positive' : 'amount-negative'}">
-                ${t.isIncome ? '+' : '-'}${t.amount.toLocaleString()}
-            </td>
+            <td>${timeStr}</td>
+            <td><span class="summary-chip" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:4px;">${selectedUser}</span></td>
+            <td>${typeLabel}</td>
+            <td ${amountColor}>${amountSign}${amount.toLocaleString()}</td>
+            <td>${unit}</td>
         </tr>
-    `).join('');
-}
+    `;
+    historyBody.insertAdjacentHTML('afterbegin', row);
 
-function updateSummary() {
-    const total = transactions.reduce((sum, t) => {
-        return sum + (t.isIncome ? t.amount : -t.amount);
-    }, 0);
-
-    const sheets = Math.floor(Math.abs(total) / 200);
-
-    document.getElementById('totalAmount').textContent = `${total.toLocaleString()} ฿`;
-    document.getElementById('transactionCount').textContent = `${sheets} ชีต`;
-}
-
-// กด Enter เพื่อบันทึก
-document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        submitTransaction();
+    // อัปเดตยอดรวม
+    if (currentType === 'withdraw') {
+        totalMoney += amount;
+    } else {
+        totalMoney -= amount;
     }
-});
 
-// เริ่มต้น
-selectType('เบิก');
+    document.getElementById('totalText').innerText = `${totalMoney.toLocaleString()} ฿`;
+    document.getElementById('unitText').innerText = `${totalMoney / 200} ขีด`;
+
+    // ล้างค่า
+    amountInput.value = '';
+}
+
+function resetAll() {
+    if(confirm("ต้องการรีเซ็ตข้อมูลทั้งหมดหรือไม่?")) {
+        location.reload();
+    }
+}
